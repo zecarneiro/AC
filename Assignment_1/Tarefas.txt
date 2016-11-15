@@ -1,0 +1,72 @@
+			//------TAREFAS------//
+
+/----3.4----/
+
+	/----3.4.1----/
+
+	Status - completo	
+
+
+	/----3.4.2----/
+	*Char_to_Int*
+
+	Status - completo - Zé
+
+	código - feito
+	comentários - feito
+
+	/----3.4.3----/
+	*SetPixel*
+
+	Status - completo - Zé & Luís
+
+	código - feito
+	comentários - feito
+
+	/----3.4.4----/
+	*Clear*
+
+	Status - completo - Luís
+
+	código - feito
+	comentários - feito
+
+	/----3.4.5----/
+	*DrawAxis*
+
+	Status - por fazer
+
+	código - 
+	comentários - 
+
+	/----3.4.6----/
+
+	*Plot*
+
+	Status - por fazer
+
+	código - 
+	comentários - 
+
+	/----3.4.7----/
+
+	*Programa Geral*
+
+	Status - por fazer
+
+	código - 
+	comentários - 
+
+	/----3.4.8----/ - Opcional
+
+	Status - por fazer
+
+	código - 
+	comentários - 
+
+/----3.5----/
+
+Status - por fazer
+
+código - 
+comentários - 
