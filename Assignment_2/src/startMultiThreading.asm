@@ -4,7 +4,7 @@
 
 .data
 Todas_Masc_int: .word 0x0000ff00	# Endereço com todas as mascaras de interrupções activas
-Masc_int_teclado: .word 0x00010000	# Endereço da mascara de interrupção do teclado
+Masc_int_teclado: .word 0x00000100	# Endereço da mascara de interrupção do teclado
 End_KDMS: .word 0xffff0000		# Endereço do simulador keyboard and Display
 .text
 #=========================== startMultiThreading ===========================
