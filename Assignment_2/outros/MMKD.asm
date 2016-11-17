@@ -2,7 +2,7 @@
 	# PM
 	.data
 ALL_INT_MASK: .word 0x0000ff00
-KBD_INT_MASK: .word 0x00010000
+KBD_INT_MASK: .word 0x00000100
 RCR:		.word 0xffff0000
 msg: .asciiz "Memory mapped keyboard and display example by\nPM\n
 	"
