@@ -1,0 +1,9 @@
+all: prog progOMP
+
+prog: prog.c funcs.c funcs.h
+	gcc -g -I/opt/local/include prog.c funcs.c  -L/opt/local/lib -lnetpbm -o prog
+
+progOMP: prog.c funcs.c funcs.h
+	gcc -I/opt/local/include prog.c funcs.c -L/opt/local/lib -lnetpbm  -fopenmp -o progOMP
+
+
