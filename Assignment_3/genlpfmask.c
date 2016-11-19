@@ -3,7 +3,7 @@
 #include <string.h>
 #include "funcs.h"
 
-ImageF * fmask genlpfmask(int rows, int cols)
+ImageF * genlpfmask(int rows, int cols)
 {
     double matriz[rows,cols]; // matriz de filtragem
 

@@ -20,3 +20,6 @@ void savePBM(char * fname, Image * image);
 void teste(ImageF * in, ImageF * out);
 
 /* coloque aqui a seguir adeclaração das funções a desenvolver */
+ImageF * genlpfmask(int , int);
+void dofilt(ImageF * , ImageF * , ImageF * , ImageF * , ImageF * );
+void fti(ImageF *, ImageF *, ImageF *, ImageF *, int );
