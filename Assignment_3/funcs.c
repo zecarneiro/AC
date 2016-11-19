@@ -115,16 +115,25 @@ void savePBM(char * fname, Image * image){
   fclose(file);
 }
 
+//MALLOC REFERENCIA MATRIX 2D
+
+
+//imginf->data=(double *)malloc(imginf->rows*imginf->cols*sizeof(double));
+
+
 ImageF * genlpfmask(int rows, int cols)
 {
-    double matriz[rows,cols]; // matriz de filtragem
+    //double matriz[rows][cols]; // matriz de filtragem
+
+    ImageF *matriz;
+    matriz->data = malloc(rows*cols*sizeof(double));
 
     //Array com posições de início de fim dos espaços brancos
-    int positions_rows[4] = {0, rows/4, rows-(rows/4), rows}
-    int positions_cols[4] = {0, cols/4, cols-(cols/4), cols}
+    int position_rows[4] = {0, rows/4, rows-(rows/4), rows};
+    int position_cols[4] = {0, cols/4, cols-(cols/4), cols};
 
     //Preenche Branco
-    for(int r = 0; r < rows, r++)
+    for(int r = 0; r < rows; r++)
     {
         for(int c = 0; c < cols; c++)
         {
@@ -134,11 +143,11 @@ ImageF * genlpfmask(int rows, int cols)
             r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
             r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
             {
-                matriz[r,c] = 1; //preenche branco 
+                matriz->data[r][c] = 1; //preenche branco 
             }
             else
             {
-                matriz[r,c] = 0; //preenche preto 
+                 matriz->data[r][c] = 0; //preenche preto 
             }
                 
         }   
@@ -150,8 +159,8 @@ ImageF * genlpfmask(int rows, int cols)
 void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inverse){
 
 	//store size
-	int rows = in_re.rows; // = M
-	int cols = in_re.cols; // = N
+	int rows = in_re->rows; // = M
+	int cols = in_re->cols; // = N
 	int Resultado_re, Resultado_im;
 
 	//Faz DFT	
@@ -167,14 +176,14 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					//Somatório inside
 					for(int n = 0; n <= cols-1; n++)
 					{
-						Resultado_re += in_re.data(m,n)*cos(-2*PI*(l*n/cols));
-						Resultado_im += in_im.data(m,n)*cos(-2*PI*(l*n/cols));
+						Resultado_re += in_re->data(m,n)*cos(-2*PI*(l*n/cols));
+						Resultado_im += in_img->data(m,n)*cos(-2*PI*(l*n/cols));
 					}
 					Resultado_re += Resultado_re*cos(-2*PI*(k*m/rows));
 					Resultado_im += Resultado_re*cos(-2*PI*(k*m/rows));
 				}
-				out_re.data(k,l) = Resultado_re;
-				out_im.data(k,l) = Resultado_im;
+				out_re->data(k,l) = Resultado_re;
+				out_img->data(k,l) = Resultado_im;
 			}
 		}
 	}
@@ -191,14 +200,14 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					//Somatório inside
 					for(int n = 0; n <= cols-1; n++)
 					{
-						Resultado_re += in_re.data(m,n)*cos(2*PI*(l*n/cols));
-						Resultado_im += in_im.data(m,n)*cos(2*PI*(l*n/cols));
+						Resultado_re += in_re->data(m,n)*cos(2*PI*(l*n/cols));
+						Resultado_im += in_img->data(m,n)*cos(2*PI*(l*n/cols));
 					}
 					Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
 					Resultado_im += Resultado_re*cos(2*PI*(k*m/rows));
 				}
-				out_re.data(k,l) = Resultado_re;
-				out_im.data(k,l) = Resultado_im;
+				out_re->data(k,l) = Resultado_re;
+				out_img->data(k,l) = Resultado_im;
 			}
 		}
 	}
@@ -206,15 +215,15 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 
 void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, ImageF * out_im)
 {
-    int rows = mask.rows;
-    int cols = mask.cols;
+    int rows = mask->rows;
+    int cols = mask->cols;
 
-    for(int r = 0; r < rows, r++)
+    for(int r = 0; r < rows; r++)
     {
         for(int c = 0; c < cols; c++)
         {
-            out_re[r,c] = in_re.data[r,c]*mask[r,c];
-            out_im[r,c] = in_im.data[r,c]*mask[r,c];
+            out_re->data[r,c] = in_re->data[r,c]*mask->data[r,c];
+            out_im->data[r,c] = in_im->data[r,c]*mask->data[r,c];
         }   
     }
 }
