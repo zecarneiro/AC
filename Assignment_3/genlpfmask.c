@@ -7,7 +7,6 @@ ImageF * fmask genlpfmask(int rows, int cols)
 {
     double matriz[rows,cols]; // matriz de filtragem
 
-
     //Array com posições de início de fim dos espaços brancos
     int positions_rows[4] = {0, rows/4, rows-(rows/4), rows}
     int positions_cols[4] = {0, cols/4, cols-(cols/4), cols}
@@ -23,8 +22,7 @@ ImageF * fmask genlpfmask(int rows, int cols)
             r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
             r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
             {
-                matriz[r,c] = 1; //preenche branco
-                  
+                matriz[r,c] = 1; //preenche branco 
             }
             else
             {
@@ -33,6 +31,5 @@ ImageF * fmask genlpfmask(int rows, int cols)
                 
         }   
     }
-
     return (matriz);
 }
