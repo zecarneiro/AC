@@ -1,18 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "funcs.h"
 
 ImageF * genlpfmask(int rows, int cols)
 {
-    double matriz[rows,cols]; // matriz de filtragem
+    //double matriz[rows][cols]; // matriz de filtragem
+
+    //Definição da matriz de filtragem
+
+    ImageF *matriz = NULL;
+
+    matriz->rows = rows;
+    matriz->cols = cols;
+    matriz->widthStep = cols*sizeof(double);
+
+    //Allocation cycle for filtering matrix
+
+    matriz->data = (double *)  malloc(sizeof(double)*rows*cols); //Aloca linhas
 
     //Array com posições de início de fim dos espaços brancos
-    int positions_rows[4] = {0, rows/4, rows-(rows/4), rows}
-    int positions_cols[4] = {0, cols/4, cols-(cols/4), cols}
+    int position_rows[4] = {0, round(rows/4), rows-round((rows/4)), rows};
+    int position_cols[4] = {0, round(cols/4), cols-round((cols/4)), cols};
 
     //Preenche Branco
-    for(int r = 0; r < rows, r++)
+    for(int r = 0; r < rows; r++)
     {
         for(int c = 0; c < cols; c++)
         {
@@ -22,11 +35,12 @@ ImageF * genlpfmask(int rows, int cols)
             r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
             r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
             {
-                matriz[r,c] = 1; //preenche branco 
+                //  imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
+                matriz->data[r*cols+c] = 1; //preenche branco 
             }
             else
             {
-                matriz[r,c] = 0; //preenche preto 
+                 matriz->data[r*cols+c] = 0; //preenche preto 
             }
                 
         }   

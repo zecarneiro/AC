@@ -9,8 +9,8 @@
 void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inverse){
 
 	//store size
-	int rows = in_re.rows; // = M
-	int cols = in_re.cols; // = N
+	int rows = in_re->rows; // = M
+	int cols = in_re->cols; // = N
 	int Resultado_re, Resultado_im;
 
 	//Faz DFT	
@@ -26,14 +26,14 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					//Somatório inside
 					for(int n = 0; n <= cols-1; n++)
 					{
-						Resultado_re += in_re.data(m,n)*cos(-2*PI*(l*n/cols));
-						Resultado_im += in_im.data(m,n)*cos(-2*PI*(l*n/cols));
+						Resultado_re += in_re->data[m*cols+n]*cos(-2*PI*(l*n/cols));
+						Resultado_im += in_img->data[m*cols+n]*cos(-2*PI*(l*n/cols));
 					}
 					Resultado_re += Resultado_re*cos(-2*PI*(k*m/rows));
 					Resultado_im += Resultado_re*cos(-2*PI*(k*m/rows));
 				}
-				out_re.data(k,l) = Resultado_re;
-				out_im.data(k,l) = Resultado_im;
+				out_re->data[k*cols+l] = Resultado_re;
+				out_img->data[k*cols+l] = Resultado_im;
 			}
 		}
 	}
@@ -50,14 +50,14 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					//Somatório inside
 					for(int n = 0; n <= cols-1; n++)
 					{
-						Resultado_re += in_re.data(m,n)*cos(2*PI*(l*n/cols));
-						Resultado_im += in_im.data(m,n)*cos(2*PI*(l*n/cols));
+						Resultado_re += in_re->data[m*cols+n]*cos(2*PI*(l*n/cols));
+						Resultado_im += in_img->data[m*cols+n]*cos(2*PI*(l*n/cols));
 					}
 					Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
 					Resultado_im += Resultado_re*cos(2*PI*(k*m/rows));
 				}
-				out_re.data(k,l) = Resultado_re;
-				out_im.data(k,l) = Resultado_im;
+				out_re->data[k*cols+l] = Resultado_re;
+				out_img->data[k*cols+l] = Resultado_im;
 			}
 		}
 	}
