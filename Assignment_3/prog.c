@@ -55,8 +55,12 @@ int main(int argc, char**argv){
     }
 
     /** processamento */
+
     /** cria mascara **/
+    imgoutf=genlpfmask(imgin->rows,imgin->cols);
+    
     /** calcula dft da imagem */
+    
     /** multiplica pela mascara */
     /** calcula dft inversa da imagem filtrada */
     /** copia para imagem de saida imgout */
