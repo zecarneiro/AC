@@ -6,19 +6,19 @@
 
 ImageF * genlpfmask(int rows, int cols)
 {
-    //double matriz[rows][cols]; // matriz de filtragem
-
     //Definição da matriz de filtragem
 
     ImageF *matriz = NULL;
 
+    matriz = malloc(sizeof(ImageF));
+    
     matriz->rows = rows;
     matriz->cols = cols;
     matriz->widthStep = cols*sizeof(double);
 
     //Allocation cycle for filtering matrix
 
-    matriz->data = (double *)  malloc(sizeof(double)*rows*cols); //Aloca linhas
+    matriz->data = (double *)malloc(sizeof(double)*rows*cols); //Aloca linhas
 
     //Array com posições de início de fim dos espaços brancos
     int position_rows[4] = {0, round(rows/4), rows-round((rows/4)), rows};
