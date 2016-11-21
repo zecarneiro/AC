@@ -41,17 +41,17 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 							#pragma omp parallel for reduction (+:Resultado_re) reduction (+:Resultado_im)
 							for(int n = 0; n <= cols-1; n++)
 							{
-								Resultado_re += in_re->data[m*cols+n]*cos(2*PI*(l*n/cols));
-								Resultado_im += in_img->data[m*cols+n]*sin(2*PI*(l*n/cols));
+								Resultado_re += in_re->data[m*cols+n]*cos(PI*(l*n/cols));
+								Resultado_im += in_img->data[m*cols+n]*sin(PI*(l*n/cols));
 
 								thread_id = omp_get_thread_num ( ) ;
 								//printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
-								//printf("Resultado_re = %d | cos = %d \n", (int) Resultado_re, (int) cos(PI*(l*n/cols)) );
+								//printf("Resultado_re = %d | cos = %d | what = %lf \n", (int) Resultado_re, (int) cos(PI*(l*n/cols)), in_re->data[m*cols+n]*cos(2*PI*(l*n/cols)) );
 								//printf("n = %d & thread_id = %d\n", n, thread_id);
 								n1 = n;
 							}
-							Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
-							Resultado_im += Resultado_im*sin(2*PI*(k*m/rows));
+							Resultado_re += Resultado_re*cos(PI*(k*m/rows));
+							Resultado_im += Resultado_im*sin(PI*(k*m/rows));
 
 
 							//printf("Resultado_re = %d | cos = %d \n", (int) Resultado_re/(rows*cols), (int) cos(PI*(l*n1/cols)) );
@@ -90,15 +90,15 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 							#pragma omp parallel for reduction (+:Resultado_re) reduction (+:Resultado_im)
 							for(int n = 0; n <= cols-1; n++)
 							{
-								Resultado_re += in_re->data[m*cols+n]*cos(2*PI*(l*n/cols));
-								Resultado_im += in_img->data[m*cols+n]*sin(2*PI*(l*n/cols));
+								Resultado_re += in_re->data[m*cols+n]*cos(PI*(l*n/cols));
+								Resultado_im += in_img->data[m*cols+n]*sin(PI*(l*n/cols));
 
 								thread_id = omp_get_thread_num ( ) ;
 								//printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
 								//printf("n = %d & thread_id = %d\n", n, thread_id);
 							}
-							Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
-							Resultado_im += Resultado_im*sin(2*PI*(k*m/rows));
+							Resultado_re += Resultado_re*cos(PI*(k*m/rows));
+							Resultado_im += Resultado_im*sin(PI*(k*m/rows));
 
 							thread_id = omp_get_thread_num ( ) ;
 							//printf("m = %d & thread_id = %d\n", m, thread_id);
