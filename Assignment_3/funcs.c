@@ -20,7 +20,8 @@ void teste(ImageF * in, ImageF * out){
       double * row2=(out->data)+i*out->cols;
       
       for(j=0;j<out->cols;j++){	  
-	  row2[j]=row1[j]+sin(j/24.0*M_PI)*50.0;
+	      row2[j]=row1[j]+sin(j/24.0*M_PI)*50.0;
+        //printf("in: %lf \n", row1[j]);
       }      
   }
 }
