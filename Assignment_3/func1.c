@@ -72,31 +72,4 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
             //printf("Iterações: %d - %d\n", r,c);
         }   
     }
-
-    /*
-    printf("OUT REAL:\n");
-
-    for(int r = 0; r < rows; r++)
-    {
-        printf("linha: %d | ", r);
-        for(int c = 0; c < cols; c++)
-        {
-            printf("%d ", (int) out_re->data[r*cols+c]);
-        }
-        printf("|\n");   
-    }
-
-    printf("========//========\n\n\n");
-    printf("\nOUT IMAGINAGRIA:\n");
-
-    for(int r = 0; r < rows; r++)
-    {
-        printf("linha: %d | ", r);
-        for(int c = 0; c < cols; c++)
-        {
-            printf("%d ", (int) out_im->data[r*cols+c]);
-        }
-        printf("|\n");   
-    }
-    */
 }   
