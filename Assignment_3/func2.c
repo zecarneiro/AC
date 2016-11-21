@@ -28,7 +28,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 		printf("DFT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 		#pragma omp parallel
 		{
-			#pragma omp for
+			//#pragma omp for
 			for(int k = 0;k < rows; k++)
 			{ //percorre linhas
 				
@@ -36,10 +36,10 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 				for(int l = 0; l < cols; l++)//percorre colunas
 				{
 					//Somatório outside
-					//#pragma omp for //reduction (+:Resultado_re, +:Resultado_im)
+					#pragma omp for reduction (+:Resultado_re) reduction (+:Resultado_im)
 					for(int m = 0; m <= rows-1; m++)
 					{
-						int n1;
+						//int n1;
 						//Somatório inside
 							//#pragma omp for //reduction (+:Resultado_re) reduction (+:Resultado_im)
 							for(int n = 0; n <= cols-1; n++)
@@ -85,14 +85,14 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 		#pragma omp parallel
 		{
 			
-			#pragma omp for 
+			//#pragma omp for 
 			for(int k = 0;k < rows; k++) //percorre linhas
 			{
 				//#pragma omp for
 				for(int l = 0; l < cols; l++)//percorre colunas
 				{
 					//Somatório outside
-					//#pragma omp for //reduction (+:Resultado_re, +:Resultado_im)
+					#pragma omp for reduction (+:Resultado_re) reduction (+:Resultado_im)
 					for(int m = 0; m <= rows-1; m++)
 					{
 						//Somatório inside
