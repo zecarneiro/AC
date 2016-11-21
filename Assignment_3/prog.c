@@ -83,26 +83,40 @@ int main(int argc, char**argv){
     out_real->widthStep=imginf->widthStep;
     out_real->data=(double *)malloc(out_real->rows*out_real->cols*sizeof(double));
 
+    ImageF *auxiliar_real = NULL;
+    auxiliar_real=(ImageF*)malloc(sizeof(ImageF));
+    auxiliar_real->rows=imginf->rows;
+    auxiliar_real->cols=imginf->cols;
+    auxiliar_real->widthStep=imginf->widthStep;
+    auxiliar_real->data=(double *)malloc(out_real->rows*out_real->cols*sizeof(double));
+
+    ImageF *auxiliar_im = NULL;
+    auxiliar_im=(ImageF*)malloc(sizeof(ImageF));
+    auxiliar_im->rows=imginf->rows;
+    auxiliar_im->cols=imginf->cols;
+    auxiliar_im->widthStep=imginf->widthStep;
+    auxiliar_im->data=(double *)malloc(out_real->rows*out_real->cols*sizeof(double));
+
     ImageF *out_mask = NULL;
     #pragma omp parallel
     {
 
-            printf("\n\n=======MASCARA========\\n\n");
-            /** cria mascara **/
-            out_mask=genlpfmask(imginf->rows,imginf->cols);
+        printf("\n\n=======MASCARA========\\n\n");
+        /** cria mascara **/
+        out_mask=genlpfmask(imginf->rows,imginf->cols);
         
-            printf("\n\n=======DFT========\\n\n");
-            /** calcula dft da imagem */
-            fti(imginf, imgin_img, out_real, out_imag, 0);
+        printf("\n\n=======DFT========\\n\n");
+        /** calcula dft da imagem */
+        fti(imginf, imgin_img, out_real, out_imag, 0);
     }
 
-            printf("\n\n=======FILTRAGEM========\\n\n");
-            /** multiplica pela mascara */
-            dofilt(imginf, imgin_img, out_mask, out_real, out_imag);
+    printf("\n\n=======FILTRAGEM========\\n\n");
+    /** multiplica pela mascara */
+    dofilt(out_real, out_imag, out_mask, auxiliar_real, auxiliar_im);
 
-            printf("\n\n=======IDFT========\\n\n");
-            /** calcula dft inversa da imagem filtrada */
-            fti(imginf, imgin_img, out_real, out_imag, 1);
+    printf("\n\n=======IDFT========\\n\n");
+    /** calcula dft inversa da imagem filtrada */
+    fti(auxiliar_real, auxiliar_im, out_real, out_imag, 1);
 
     /** copia para imagem de saida imgout */
     double val;

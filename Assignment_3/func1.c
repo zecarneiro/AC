@@ -59,15 +59,42 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
     int rows = mask->rows;
     int cols = mask->cols;
 
-    #pragma omp parallel for collapse(2)
+    #pragma omp parallel_tag
+    {
+        for(int r = 0; r < rows; r++)
+        {
+            for(int c = 0; c < cols; c++)
+            {
+                out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
+                out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
+                //printf("Iterações: %d - %d\n", r,c);
+            }   
+        }
+    }
+
+    printf("OUT REAL:\n");
+
     for(int r = 0; r < rows; r++)
     {
+        printf("linha: %d | ", r);
         for(int c = 0; c < cols; c++)
         {
-            out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
-            out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
-            printf("Iterações: %d - %d\n", r,c);
-        }   
+            printf("%d ", (int) out_re->data[r*cols+c]);
+        }
+        printf("|\n");   
+    }
+
+    printf("========//========\n\n\n");
+    printf("\nOUT IMAGINAGRIA:\n");
+
+    for(int r = 0; r < rows; r++)
+    {
+        printf("linha: %d | ", r);
+        for(int c = 0; c < cols; c++)
+        {
+            printf("%d ", (int) out_im->data[r*cols+c]);
+        }
+        printf("|\n");   
     }
 
 }   

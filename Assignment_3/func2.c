@@ -45,8 +45,8 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 								//printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
 								//printf("n = %d & thread_id = %d\n", n, thread_id);
 							}
-							Resultado_re *= Resultado_re*cos(-2*PI*(k*m/rows));
-							Resultado_im *= Resultado_re*sin(-2*PI*(k*m/rows));
+							Resultado_re += Resultado_re*cos(-2*PI*(k*m/rows));
+							Resultado_im += Resultado_im*sin(-2*PI*(k*m/rows));
 
 							thread_id = omp_get_thread_num ( ) ;
 							//printf("m = %d & thread_id = %d\n", m, thread_id);
@@ -85,7 +85,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 
 							}
 							Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
-							Resultado_im += Resultado_re*sin(2*PI*(k*m/rows));
+							Resultado_im += Resultado_im*sin(2*PI*(k*m/rows));
 					}
 					out_re->data[k*cols+l] = Resultado_re;
 					out_img->data[k*cols+l] = Resultado_im;
