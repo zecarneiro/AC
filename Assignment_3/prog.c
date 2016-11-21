@@ -108,7 +108,34 @@ int main(int argc, char**argv){
         printf("\n\n=======DFT========\\n\n");
         /** calcula dft da imagem */
         fti(imginf, imgin_img, out_real, out_imag, 0);
+
     }
+
+            /*printf("OUT REAL:\n");
+
+            for(int r = 0; r < out_real->rows; r++)
+            {
+                printf("linha: %d | ", r);
+                for(int c = 0; c < out_real->cols; c++)
+                {
+                    printf("%d ", (int) out_real->data[r*(out_real->cols)+c]);
+                }
+                printf("|\n");   
+            }
+
+            printf("========//========\n\n\n");
+            printf("\nOUT IMAGINAGRIA:\n");
+
+            for(int r = 0; r < out_imag->rows; r++)
+            {
+                printf("linha: %d | ", r);
+                for(int c = 0; c < out_imag->cols; c++)
+                {
+                    printf("%d ", (int) out_imag->data[r*(out_imag->cols)+c]);
+                }
+                printf("|\n");   
+            }*/
+
 
     printf("\n\n=======FILTRAGEM========\\n\n");
     /** multiplica pela mascara */
@@ -122,6 +149,12 @@ int main(int argc, char**argv){
     double val;
     for (i=0;i<out_real->rows;i++){
         for(j=0;j<out_real->cols;j++){
+            val=imgoutf->data[i*imgoutf->cols+j];
+	    
+            if (val<0)
+                val=0.0;
+            else if (val>255)
+                val=255.0;
             val=out_real->data[i*out_real->cols+j];
             imgout->data[i*imgout->cols+j]=(unsigned char)val;
         }  

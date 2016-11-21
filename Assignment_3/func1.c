@@ -71,7 +71,7 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
             }   
         }
     }
-
+    /*
     printf("OUT REAL:\n");
 
     for(int r = 0; r < rows; r++)
@@ -96,5 +96,5 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
         }
         printf("|\n");   
     }
-
+    */
 }   
