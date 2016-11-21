@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "funcs.h"
 
 int main(int argc, char**argv){
@@ -98,8 +99,8 @@ int main(int argc, char**argv){
     auxiliar_im->data=(double *)malloc(out_real->rows*out_real->cols*sizeof(double));
 
     ImageF *out_mask = NULL;
-    #pragma omp parallel
-    {
+    //#pragma omp parallel
+    //{
 
         printf("\n\n=======MASCARA========\\n\n");
         /** cria mascara **/
@@ -109,7 +110,7 @@ int main(int argc, char**argv){
         /** calcula dft da imagem */
         fti(imginf, imgin_img, out_real, out_imag, 0);
 
-    }
+    //}
 
             /*printf("OUT REAL:\n");
 
@@ -146,19 +147,24 @@ int main(int argc, char**argv){
     fti(auxiliar_real, auxiliar_im, out_real, out_imag, 1);
 
     /** copia para imagem de saida imgout */
-    double val;
+    double val,val1;
+    #pragma omp for
     for (i=0;i<out_real->rows;i++){
-        for(j=0;j<out_real->cols;j++){
-            val=imgoutf->data[i*imgoutf->cols+j];
-	    
-            if (val<0)
+        for(j=0;j<out_real->cols;j++){	    
+            
+            val =out_real->data[i*out_real->cols+j]*out_real->data[i*out_real->cols+j];
+            val1= out_imag->data[i*out_imag->cols+j]*out_imag->data[i*out_imag->cols+j];
+
+            val = (double)sqrt(val+val1);
+            /*if (val<0)
                 val=0.0;
             else if (val>255)
-                val=255.0;
-            val=out_real->data[i*out_real->cols+j];
+                val=255.0;*/
+
             imgout->data[i*imgout->cols+j]=(unsigned char)val;
         }  
     }
+
     savePBM(fnameout,imgout);
     
     return 0;
