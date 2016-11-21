@@ -46,13 +46,13 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 							//#pragma omp for //reduction (+:Resultado_re) reduction (+:Resultado_im)
 							for(int n = 0; n <= cols-1; n++)
 							{
-								Resultado_re += in_re->data[m*cols+n]*( cos(2.0*PI*(l*n/cols)) - I*sin(2.0*PI*(l*n/cols)) );
+								Resultado_re += in_re->data[m*cols+n]*( cos(-2.0*PI*(l*n/cols)) - I*sin(2.0*PI*(l*n/cols)) );
 
 								//long double seno = (long double) sin(2.0*PI*(l*n/cols));
 								//printf ("seno = %Le | x = %lf \n", seno, 2.0*PI*(l*n/cols));
-								//double aux = in_re->data[m*cols+n];
-								//double trig = ( cos(2.0*PI*(l*n/cols)) - I*sin(2.0*PI*(l*n/cols)) );
-            					//printf("aux = %lf | trig = %lf \n", aux,trig);
+								double aux = in_re->data[m*cols+n];
+								double trig = ( cos(-2.0*PI*(l*n/cols)) - I*sin(2.0*PI*(l*n/cols)) );
+            					printf("aux = %lf | trig = %lf \n", aux,trig);
 
 								Resultado_im += in_re->data[m*cols+n]*( cos(2.0*PI*(l*n/cols)) - I*sin(2.0*PI*(l*n/cols)) );
 
@@ -126,8 +126,8 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					out_re->data[k*cols+l] = Resultado_re/(rows*cols);
 					out_img->data[k*cols+l] = Resultado_im/(rows*cols);
 
-					double aux = out_re->data[k*out_re->cols+l];
-            		printf("out_re = %lf \n", aux);
+					//double aux = out_re->data[k*out_re->cols+l];
+            		//printf("out_re = %lf \n", aux);
 
 					Resultado_re = 0.0;
 					Resultado_im = 0.0;
