@@ -3,12 +3,6 @@
 #include <string.h>
 #include "funcs.h"
 
-/* coloque aqui o código das funções pedidas e que devem ser chamadas abaixo */
-
-
-
-
-
 int main(int argc, char**argv){
     
     char fnamein[255];
@@ -55,34 +49,64 @@ int main(int argc, char**argv){
     }
 
     /** processamento */
+    /* Estamos a criar uma matriz com numeros imaginarios
+     * Como a variavel imginf é que contém a informação original, então a vou usar */
+    ImageF *imgin_img = NULL;
+    imgin_img=(ImageF*)malloc(sizeof(ImageF));
+    imgin_img->rows=imginf->rows;
+    imgin_img->cols=imginf->cols;
+    imgin_img->widthStep=imginf->widthStep;
+    imgin_img->data=(double *)malloc(imgin_img->rows*imgin_img->cols*sizeof(double));
+
+    for (i=0;i<imgin_img->rows;i++){
+        for(j=0;j<imgin_img->cols;j++){
+            imgin_img->data[i*imgin_img->cols+j]=0;
+        }  
+    }
+
+    /* Estamos a criar as estruturas para as saidas necessárias para as funções
+     * referidas no enunciado e feitas por nós, sendo
+     * out_imag = matriz com valores imaginarios de saida
+     * out_real = matriz com valores reais de saida
+     * out_mask = Mascara */
+    ImageF *out_imag = NULL;
+    out_imag=(ImageF*)malloc(sizeof(ImageF));
+    out_imag->rows=imginf->rows;
+    out_imag->cols=imginf->cols;
+    out_imag->widthStep=imginf->widthStep;
+    out_imag->data=(double *)malloc(out_imag->rows*out_imag->cols*sizeof(double));
+
+    ImageF *out_real = NULL;
+    out_real=(ImageF*)malloc(sizeof(ImageF));
+    out_real->rows=imginf->rows;
+    out_real->cols=imginf->cols;
+    out_real->widthStep=imginf->widthStep;
+    out_real->data=(double *)malloc(out_real->rows*out_real->cols*sizeof(double));
+
+    ImageF *out_mask = NULL;
 
     /** cria mascara **/
-    imgoutf=genlpfmask(imgin->rows,imgin->cols);
+    out_mask=genlpfmask(imginf->rows,imginf->cols);
+    printf("oi\n");
     
     /** calcula dft da imagem */
-    
-    /** multiplica pela mascara */
-    /** calcula dft inversa da imagem filtrada */
-    /** copia para imagem de saida imgout */
-  
-    /** A seguir é apenas um exemplo que deve ser retirado e substituido pela chamadas às funções a escrever */
-    /* Só para testar. Comentar quando incluir o seu código*/
-    teste(imginf, imgoutf);
+    fti(imginf, imgin_img, out_real, out_imag, 0);
 
-    for (i=0;i<imgoutf->rows;i++){
-	for(j=0;j<imgoutf->cols;j++){
-	   double val;
-	    val=imgoutf->data[i*imgoutf->cols+j];
-	    
-	    if (val<0)
-		val=0.0;
-	    else if (val>255)
-		val=255.0;
-	    imgout->data[i*imgout->cols+j]=(unsigned char)val;
-	    
-	}
+    /** multiplica pela mascara */
+    dofilt(imginf, imgin_img, out_mask, out_real, out_imag);
+
+    /** calcula dft inversa da imagem filtrada */
+    fti(imginf, imgin_img, out_real, out_imag, 1);
+
+    /** copia para imagem de saida imgout */
+    double val;
+    for (i=0;i<out_real->rows;i++){
+        for(j=0;j<out_real->cols;j++){
+            val=out_real->data[i*out_real->cols+j];
+            imgout->data[i*imgout->cols+j]=(unsigned char)val;
+        }  
     }
     savePBM(fnameout,imgout);
+    
     return 0;
-    }
-
+}

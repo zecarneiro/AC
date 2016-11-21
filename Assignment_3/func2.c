@@ -10,7 +10,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	//store size
 	int rows = in_re->rows; // = M
 	int cols = in_re->cols; // = N
-	int Resultado_re, Resultado_im;
+	double Resultado_re, Resultado_im;
 
 	//Faz DFT	
 	if(inverse == 0)
@@ -26,10 +26,10 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					for(int n = 0; n <= cols-1; n++)
 					{
 						Resultado_re += in_re->data[m*cols+n]*cos(-2*PI*(l*n/cols));
-						Resultado_im += in_img->data[m*cols+n]*cos(-2*PI*(l*n/cols));
+						Resultado_im += in_img->data[m*cols+n]*sin(-2*PI*(l*n/cols));
 					}
 					Resultado_re += Resultado_re*cos(-2*PI*(k*m/rows));
-					Resultado_im += Resultado_re*cos(-2*PI*(k*m/rows));
+					Resultado_im += Resultado_re*sin(-2*PI*(k*m/rows));
 				}
 				out_re->data[k*cols+l] = Resultado_re;
 				out_img->data[k*cols+l] = Resultado_im;
@@ -50,10 +50,10 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 					for(int n = 0; n <= cols-1; n++)
 					{
 						Resultado_re += in_re->data[m*cols+n]*cos(2*PI*(l*n/cols));
-						Resultado_im += in_img->data[m*cols+n]*cos(2*PI*(l*n/cols));
+						Resultado_im += in_img->data[m*cols+n]*sin(2*PI*(l*n/cols));
 					}
 					Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
-					Resultado_im += Resultado_re*cos(2*PI*(k*m/rows));
+					Resultado_im += Resultado_re*sin(2*PI*(k*m/rows));
 				}
 				out_re->data[k*cols+l] = Resultado_re;
 				out_img->data[k*cols+l] = Resultado_im;
