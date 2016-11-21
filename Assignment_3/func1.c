@@ -27,30 +27,32 @@ ImageF * genlpfmask(int rows, int cols)
     //Array com posições de início de fim dos espaços brancos
     int position_rows[4] = {0, round(rows/4), rows-round((rows/4)), rows};
     int position_cols[4] = {0, round(cols/4), cols-round((cols/4)), cols};
-
-    //Preenche Branco
-    #pragma omp for
-    for(int r = 0; r < rows; r++)
+    #pragma omp parallel
     {
-        for(int c = 0; c < cols; c++)
+        //Preenche Branco
+        #pragma omp for
+        for(int r = 0; r < rows; r++)
         {
-            // Verifica se está dentro da zona branca
-            if(r >= position_rows[0] && c >= position_cols[0] && r <= position_rows[1] && c <= position_cols[1] || //zona superior esquerda
-            r >= position_rows[0] && c >= position_cols[2] && r <= position_rows[1] && c <= position_cols[3] || //zona superior direita
-            r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
-            r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
+            for(int c = 0; c < cols; c++)
             {
-                printf("Branco - %d - %d\n",r, c);
-                //  imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
-                matriz->data[r*cols+c] = 1; //preenche branco 
-            }
-            else
-            {
-                printf("Preto - %d - %d\n",r, c);
-                matriz->data[r*cols+c] = 0; //preenche preto 
-            }
-                
-        }   
+                // Verifica se está dentro da zona branca
+                if(r >= position_rows[0] && c >= position_cols[0] && r <= position_rows[1] && c <= position_cols[1] || //zona superior esquerda
+                r >= position_rows[0] && c >= position_cols[2] && r <= position_rows[1] && c <= position_cols[3] || //zona superior direita
+                r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
+                r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
+                {
+                    printf("Branco - %d - %d\n",r, c);
+                    //  imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
+                    matriz->data[r*cols+c] = 1; //preenche branco 
+                }
+                else
+                {
+                    printf("Preto - %d - %d\n",r, c);
+                    matriz->data[r*cols+c] = 0; //preenche preto 
+                }
+                    
+            }   
+        }
     }
     return (matriz);
 }
@@ -60,14 +62,17 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
     int rows = mask->rows;
     int cols = mask->cols;
 
-    #pragma omp for
-    for(int r = 0; r < rows; r++)
+    #pragma omp parallel
     {
-        for(int c = 0; c < cols; c++)
+        #pragma omp for
+        for(int r = 0; r < rows; r++)
         {
-            out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
-            out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
-            printf("Iterações: %d - %d\n", r,c);
-        }   
+            for(int c = 0; c < cols; c++)
+            {
+                out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
+                out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
+                printf("Iterações: %d - %d\n", r,c);
+            }   
+        }
     }
 }   
