@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <omp.h>
 #include "funcs.h"
 
 #define PI 3.14159265359
@@ -15,6 +16,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	//Faz DFT	
 	if(inverse == 0)
 	{
+		#pragma omp for
 		for(int k = 0;k < rows; k++) //percorre linhas
 		{
 			for(int l = 0; l < rows; l++)//percorre colunas
@@ -39,6 +41,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	else if (inverse == 1) //Faz IDFT
 	{
 		//Parte Real
+		#pragma omp for
 		for(int k = 0;k < rows; k++) //percorre linhas
 		{
 			for(int l = 0; l < rows; l++)//percorre colunas

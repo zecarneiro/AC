@@ -87,7 +87,6 @@ int main(int argc, char**argv){
 
     /** cria mascara **/
     out_mask=genlpfmask(imginf->rows,imginf->cols);
-    printf("oi\n");
     
     /** calcula dft da imagem */
     fti(imginf, imgin_img, out_real, out_imag, 0);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <omp.h>
 #include "funcs.h"
 
 ImageF * genlpfmask(int rows, int cols)
@@ -25,6 +26,7 @@ ImageF * genlpfmask(int rows, int cols)
     int position_cols[4] = {0, round(cols/4), cols-round((cols/4)), cols};
 
     //Preenche Branco
+    #pragma omp for
     for(int r = 0; r < rows; r++)
     {
         for(int c = 0; c < cols; c++)
@@ -53,6 +55,7 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
     int rows = mask->rows;
     int cols = mask->cols;
 
+    #pragma omp for
     for(int r = 0; r < rows; r++)
     {
         for(int c = 0; c < cols; c++)
