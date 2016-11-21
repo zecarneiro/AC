@@ -4,9 +4,8 @@
 #include <math.h>
 #include "funcs.h"
 
-#ifdef __OPENMP
-    #include <omp.h>
-#endif
+#include <omp.h>
+
 
 ImageF * genlpfmask(int rows, int cols)
 {
@@ -27,10 +26,9 @@ ImageF * genlpfmask(int rows, int cols)
     //Array com posições de início de fim dos espaços brancos
     int position_rows[4] = {0, round(rows/4), rows-round((rows/4)), rows};
     int position_cols[4] = {0, round(cols/4), cols-round((cols/4)), cols};
-    #pragma omp parallel
-    {
+
         //Preenche Branco
-        #pragma omp for
+        #pragma omp parallel for collapse(2)
         for(int r = 0; r < rows; r++)
         {
             for(int c = 0; c < cols; c++)
@@ -52,7 +50,6 @@ ImageF * genlpfmask(int rows, int cols)
                 }
                     
             }   
-        }
     }
     return (matriz);
 }
@@ -62,17 +59,15 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
     int rows = mask->rows;
     int cols = mask->cols;
 
-    #pragma omp parallel
+    #pragma omp parallel for collapse(2)
+    for(int r = 0; r < rows; r++)
     {
-        #pragma omp for
-        for(int r = 0; r < rows; r++)
+        for(int c = 0; c < cols; c++)
         {
-            for(int c = 0; c < cols; c++)
-            {
-                out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
-                out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
-                printf("Iterações: %d - %d\n", r,c);
-            }   
-        }
+            out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
+            out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
+            printf("Iterações: %d - %d\n", r,c);
+        }   
     }
+
 }   

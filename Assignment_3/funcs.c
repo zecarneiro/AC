@@ -115,32 +115,4 @@ void savePBM(char * fname, Image * image){
   fclose(file);
 }
 
-//MALLOC REFERENCIA MATRIX 2D -> é 1D :(
 
-
-//ImageF *imginf=NULL;
-
-//imginf=(ImageF*)malloc(sizeof(ImageF));
-//imginf->rows=imgin->rows;
-//imginf->cols=imgin->cols;
-//imginf->widthStep=imginf->cols*sizeof(double);
-//imginf->data=(double *)malloc(imginf->rows*imginf->cols*sizeof(double));
-
-// copiar imagem para uma nova em formato double
-    //for (i=0;i<imgin->rows;i++){     
-	//for(j=0;j<imgin->cols;j++)
-	  //  imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
-   // }
-
-/*   void teste(ImageF * in, ImageF * out){
-    int i,j;
- for (i=0;i<out->rows;i++){
-      // ponteiros para linha i de cada imagem
-      double * row1=(in->data)+i*in->cols;
-      double * row2=(out->data)+i*out->cols;
-      
-      for(j=0;j<out->cols;j++){	  
-	  row2[j]=row1[j]+sin(j/24.0*M_PI)*50.0;
-      }      
-  }
-}*/

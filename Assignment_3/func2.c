@@ -6,6 +6,8 @@
 
 #ifdef __OPENMP
     #include <omp.h>
+#else 
+	#define omp_get_thread_num() 0
 #endif
 
 #define PI 3.14159265359
@@ -17,79 +19,76 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	int cols = in_re->cols; // = N
 	double Resultado_re, Resultado_im;
 
+	int thread_id;
+
 	//Faz DFT	
 	if(inverse == 0)
 	{
-		#pragma omp parallel default(shared)
-    	{
-			#pragma omp for
-			for(int k = 0;k < rows; k++) //percorre linhas
+		#pragma omp parallel for 
+		for(int k = 0;k < rows; k++) //percorre linhas
+		{
+			#pragma omp parallel for
+			for(int l = 0; l < rows; l++)//percorre colunas
 			{
-				for(int l = 0; l < rows; l++)//percorre colunas
-				{
-					#pragma omp parallel shared(k,l)
+					//Somatório outside
+					#pragma omp parallel for //reduction (+:Resultado_re, +:Resultado_im)
+					for(int m = 0; m <= rows-1; m++)
 					{
-						#pragma omp for
-						//Somatório outside
-						for(int m = 0; m <= rows-1; m++)
-						{
-							//Somatório inside
-							#pragma omp parallel shared(k,l,m)
+						//Somatório inside
+							#pragma omp parallel for reduction (+:Resultado_re) reduction (+:Resultado_im)
+							for(int n = 0; n <= cols-1; n++)
 							{
-								#pragma omp for
-								for(int n = 0; n <= cols-1; n++)
-								{
-									Resultado_re += in_re->data[m*cols+n]*cos(-2*PI*(l*n/cols));
-									Resultado_im += in_img->data[m*cols+n]*sin(-2*PI*(l*n/cols));
+								Resultado_re += in_re->data[m*cols+n]*cos(-2*PI*(l*n/cols));
+								Resultado_im += in_img->data[m*cols+n]*sin(-2*PI*(l*n/cols));
 
-									printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
-
-								}
-								Resultado_re += Resultado_re*cos(-2*PI*(k*m/rows));
-								Resultado_im += Resultado_re*sin(-2*PI*(k*m/rows));
+								thread_id = omp_get_thread_num ( ) ;
+								//printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
+								//printf("n = %d & thread_id = %d\n", n, thread_id);
 							}
-						}
-						out_re->data[k*cols+l] = Resultado_re;
-						out_img->data[k*cols+l] = Resultado_im;
+							Resultado_re *= Resultado_re*cos(-2*PI*(k*m/rows));
+							Resultado_im *= Resultado_re*sin(-2*PI*(k*m/rows));
+
+							thread_id = omp_get_thread_num ( ) ;
+							//printf("m = %d & thread_id = %d\n", m, thread_id);
 					}
-				}
+					out_re->data[k*cols+l] = Resultado_re;
+					out_img->data[k*cols+l] = Resultado_im;
+
+					thread_id = omp_get_thread_num ( ) ;
+					//printf("l = %d & thread_id = %d\n", l, thread_id);
+					//printf("Iterações: %d - %d\n", k,l);
 			}
+
+			thread_id = omp_get_thread_num ( ) ;
+			//printf("k = %d & thread_id = %d\n", k, thread_id);
 		}
 	}
 	else if (inverse == 1) //Faz IDFT
 	{
-		#pragma omp parallel default(shared)
-    	{
-			//Parte Real
-			#pragma omp for
-			for(int k = 0;k < rows; k++) //percorre linhas
+		#pragma omp parallel for default(shared)
+		for(int k = 0;k < rows; k++) //percorre linhas
+		{
+			#pragma omp parallel for default(shared)
+			for(int l = 0; l < rows; l++)//percorre colunas
 			{
-				for(int l = 0; l < rows; l++)//percorre colunas
-				{
-					#pragma omp parallel shared(k,l)
+					//Somatório outside
+					for(int m = 0; m <= rows-1; m++)
 					{
-						#pragma omp for
-						//Somatório outside
-						for(int m = 0; m <= rows-1; m++)
-						{
-							//Somatório inside
-							#pragma omp parallel shared(k,l,m)
+						//Somatório inside
+
+							for(int n = 0; n <= cols-1; n++)
 							{
-								#pragma omp for
-								for(int n = 0; n <= cols-1; n++)
-								{
-									Resultado_re += in_re->data[m*cols+n]*cos(2*PI*(l*n/cols));
-									Resultado_im += in_img->data[m*cols+n]*sin(2*PI*(l*n/cols));
-									printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
-								}
-								Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
-								Resultado_im += Resultado_re*sin(2*PI*(k*m/rows));
+								Resultado_re += in_re->data[m*cols+n]*cos(2*PI*(l*n/cols));
+								Resultado_im += in_img->data[m*cols+n]*sin(2*PI*(l*n/cols));
+
+								//printf("Iterações: %d - %d - %d - %d\n", k,l,m,n);
+
 							}
-						}
-						out_re->data[k*cols+l] = Resultado_re;
-						out_img->data[k*cols+l] = Resultado_im;
+							Resultado_re += Resultado_re*cos(2*PI*(k*m/rows));
+							Resultado_im += Resultado_re*sin(2*PI*(k*m/rows));
 					}
-				}
+					out_re->data[k*cols+l] = Resultado_re;
+					out_img->data[k*cols+l] = Resultado_im;
 			}
 		}
 	}

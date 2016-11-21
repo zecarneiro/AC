@@ -84,33 +84,25 @@ int main(int argc, char**argv){
     out_real->data=(double *)malloc(out_real->rows*out_real->cols*sizeof(double));
 
     ImageF *out_mask = NULL;
-    #pragma omp sections
+    #pragma omp parallel
     {
-        #pragma omp section
-        {
+
             printf("\n\n=======MASCARA========\\n\n");
             /** cria mascara **/
             out_mask=genlpfmask(imginf->rows,imginf->cols);
-        }
-        #pragma omp section
-        {   
+        
             printf("\n\n=======DFT========\\n\n");
             /** calcula dft da imagem */
             fti(imginf, imgin_img, out_real, out_imag, 0);
-        }
-        #pragma omp section
-        {
-            printf("\n\n=======FLITRAGEM========\\n\n");
+    }
+
+            printf("\n\n=======FILTRAGEM========\\n\n");
             /** multiplica pela mascara */
             dofilt(imginf, imgin_img, out_mask, out_real, out_imag);
-        }
-        #pragma omp section
-        {
+
             printf("\n\n=======IDFT========\\n\n");
             /** calcula dft inversa da imagem filtrada */
             fti(imginf, imgin_img, out_real, out_imag, 1);
-        }
-    }
 
     /** copia para imagem de saida imgout */
     double val;
