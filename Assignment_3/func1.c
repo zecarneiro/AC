@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <omp.h>
 #include "funcs.h"
+
+#ifdef __OPENMP
+    #include <omp.h>
+#endif
 
 ImageF * genlpfmask(int rows, int cols)
 {
@@ -37,12 +40,14 @@ ImageF * genlpfmask(int rows, int cols)
             r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
             r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
             {
+                printf("Branco - %d - %d\n",r, c);
                 //  imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
                 matriz->data[r*cols+c] = 1; //preenche branco 
             }
             else
             {
-                 matriz->data[r*cols+c] = 0; //preenche preto 
+                printf("Preto - %d - %d\n",r, c);
+                matriz->data[r*cols+c] = 0; //preenche preto 
             }
                 
         }   
@@ -62,6 +67,7 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
         {
             out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
             out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
+            printf("Iterações: %d - %d\n", r,c);
         }   
     }
 }   
