@@ -9,10 +9,6 @@
 
 ImageF * genlpfmask(int rows, int cols)
 {
-
-    printf("Rows = %d | Cols = %d", rows, cols);
-
-
     //Definição da matriz de filtragem
 
     ImageF *matriz = NULL;
@@ -43,18 +39,15 @@ ImageF * genlpfmask(int rows, int cols)
                 r >= position_rows[2] && c >= position_cols[0] && r <= position_rows[3] && c <= position_cols[1] || //zona inferior esquerda
                 r >= position_rows[2] && c >= position_cols[2] && r <= position_rows[3] && c <= position_cols[3]) //zona inferior direita
                 {
-                    //printf("Branco - %d - %d\n",r, c);
-                    //  imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
                     matriz->data[r*cols+c] = 1; //preenche branco 
                 }
                 else
                 {
-                    //printf("Preto - %d - %d\n",r, c);
                     matriz->data[r*cols+c] = 0; //preenche preto 
                 }
                     
             }   
-    }
+        }
     return (matriz);
 }
 
@@ -62,6 +55,7 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
 {
     int rows = mask->rows;
     int cols = mask->cols;
+
     #pragma omp for
     for(int r = 0; r < rows; r++)
     {
@@ -69,7 +63,6 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
         {
             out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
             out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
-            //printf("Iterações: %d - %d\n", r,c);
         }   
     }
 }   

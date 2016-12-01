@@ -1,5 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <fcntl.h>
 #include <string.h>
 #ifdef __APPLE__
@@ -10,8 +9,6 @@
 #include "funcs.h"
 #include <math.h>
 
-#define PI 3.14159265359
-
 void teste(ImageF * in, ImageF * out){
     int i,j;
  for (i=0;i<out->rows;i++){
@@ -20,8 +17,7 @@ void teste(ImageF * in, ImageF * out){
       double * row2=(out->data)+i*out->cols;
       
       for(j=0;j<out->cols;j++){	  
-	      row2[j]=row1[j]+sin(j/24.0*M_PI)*50.0;
-        //printf("in: %lf \n", row1[j]);
+	  row2[j]=row1[j]+sin(j/24.0*M_PI)*50.0;
       }      
   }
 }
@@ -115,5 +111,3 @@ void savePBM(char * fname, Image * image){
   pnm_freepamrow(tuplerow);
   fclose(file);
 }
-
-

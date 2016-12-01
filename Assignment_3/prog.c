@@ -49,8 +49,6 @@ int main(int argc, char**argv){
 	    for(j=0;j<imgin->cols;j++)
         {
             imginf->data[i*imginf->cols+j]=imgin->data[i*imgin->cols+j];
-            double aux = imginf->data[i*imginf->cols+j];
-            printf("imginf = %lf \n", aux);
         }
     }
 
@@ -106,37 +104,32 @@ int main(int argc, char**argv){
     ImageF *out_mask = NULL;
 
     /** cria mascara **/
-    printf("\n\n=======MASCARA========\\n\n");
+    printf("\n\n========= MASCARA");
     out_mask=genlpfmask(imginf->rows,imginf->cols);
         
     /** calcula dft da imagem */
-    printf("\n\n=======DFT========\\n\n");
+    printf("\n========= DFT");
     fti(imginf, imgin_img, out_real, out_imag, 0);
 
     /** multiplica pela mascara */
-    printf("\n\n=======FILTRAGEM========\\n\n");
+    printf("\n========= FILTRAGEM");
     dofilt(out_real, out_imag, out_mask, auxiliar_real, auxiliar_im);
 
     /** calcula dft inversa da imagem filtrada */
-    printf("\n\n=======IDFT========\\n\n");
+    printf("\n========= IDFT\n");
     fti(auxiliar_real, auxiliar_im, out_real, out_imag, 1);
 
     /** copia para imagem de saida imgout */
     double val_re,val_img,val;
     for (i=0;i<out_real->rows;i++){
-        for(j=0;j<out_real->cols;j++){	    
-            val_re = abs(out_real->data[i*out_real->cols+j]);
+        for(j=0;j<out_real->cols;j++){	   
 
-            val_img = abs(out_imag->data[i*out_real->cols+j]);
+            val = out_real->data[i*out_real->cols+j];
 
-            val_re *= val_re;
-            val_img *= val_img;
-
-            val = sqrt(val_re+val_img);
             if (val<0)
-                val=0.0;
-            else if (val>255)
-                val=255.0;
+				val=0.0;
+	    	else if (val>255)
+				val=255.0;
 
             imgout->data[i*imgout->cols+j]=(unsigned char)val;
         }  
