@@ -24,7 +24,7 @@ void fft(double *v_re , double *ve_im, int N, int inv){
 	double *Re = (double*)malloc(N*sizeof(double));
 	double *Im = (double*)malloc(N*sizeof(double));
 
-	double dois_PI,arg_cs;
+	double dois_PI,arg_cs,re,im;
 	int k,n;
 
 	/* Através da expressão da transformada, o theta
@@ -39,21 +39,25 @@ void fft(double *v_re , double *ve_im, int N, int inv){
 	}
 
 	/* É aplicado a expresśão da transformadas */
-	#pragma omp for
 	for(k = 0; k < N; ++k){
 		/* Como a expressão da transformada é um
 		 * somatório, então vector tem que ser
 		 * igual a zero no inicio */
-		Re[k] = 0.0;
-		Im[k] = 0.0;
+		re = 0.0;
+		im = 0.0;
 
+		#pragma omp parallel for private(arg_cs) reduction(+:re,im)
 		for(n = 0; n < N; ++n){
 			arg_cs = (double)(k*n);
 			arg_cs = (arg_cs*dois_PI)/N;
 
-			Re[k] += v_re[n]*cos(arg_cs) - ve_im[n]*sin(arg_cs);
-			Im[k] += v_re[n]*sin(arg_cs) + ve_im[n]*cos(arg_cs);
+			re = re + v_re[n]*cos(arg_cs) - ve_im[n]*sin(arg_cs);
+			im = im + v_re[n]*sin(arg_cs) + ve_im[n]*cos(arg_cs);
 		}
+
+		/* Os resultados são introduzidos no vector */
+		Re[k] = re;
+		Im[k] = im;
 
 		/* Caso seja uma transformada inversa
 		 * então tenho que dividir o resultado
@@ -66,10 +70,13 @@ void fft(double *v_re , double *ve_im, int N, int inv){
 
 	/* Depois de fazer a transformada, os resultados
 	 * são devolvidos */
-	#pragma omp for
-	for(k = 0; k < N; ++k){
-		v_re[k] = Re[k];
-		ve_im[k] = Im[k];
+	#pragma omp parallel
+	{
+		#pragma omp for
+		for(k = 0; k < N; ++k){
+			v_re[k] = Re[k];
+			ve_im[k] = Im[k];
+		}
 	}
 }
 
@@ -90,21 +97,28 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 
 	/* Como criei uma matriz Nx1 e por ponteiro de ponteiro, então
 	 * vou criar as colunas para cada matriz criada por anterior */
-	#pragma omp for
-	for(i = 0; i < rows; ++i){
-		matriz_re[i] = (double*)malloc(cols*sizeof(double));
-		matriz_im[i] = (double*)malloc(cols*sizeof(double));
+	#pragma omp parallel
+	{
+		#pragma omp for
+		for(i = 0; i < rows; ++i){
+			matriz_re[i] = (double*)malloc(cols*sizeof(double));
+			matriz_im[i] = (double*)malloc(cols*sizeof(double));
+		}
 	}
 
 	/* Faço a copia das matrizes de entrada e armazeno nas matrizes
 	 * criadas por mim */
 	for(i = 0; i < rows; ++i){
-		#pragma omp for
-		for(j = 0; j < cols; ++j){
-			matriz_re[i][j] = in_re->data[i*cols+j];
-			matriz_im[i][j] = in_img->data[i*cols+j];
+		#pragma omp parallel
+		{
+			#pragma omp for
+			for(j = 0; j < cols; ++j){
+				matriz_re[i][j] = in_re->data[i*cols+j];
+				matriz_im[i][j] = in_img->data[i*cols+j];
+			}
 		}
 	}
+	
 
 
 	/* crio os vectores que vai receber os valores de cada linha e
@@ -115,55 +129,74 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	double *coluna_im = (double*)malloc(cols*sizeof(double));
 
 	// Calculos para as linhas
-	#pragma omp for
 	for(i = 0; i < rows; ++i){
 
 		/* As linhas da imagem/matriz são passados para os
 		 * vectores linhas */
-		for(j = 0; j < cols; ++j){
-			linha_re[j] = matriz_re[i][j];
-			linha_im[j] = matriz_im[i][j];
+		#pragma omp parallel
+		{
+			#pragma omp for
+			for(j = 0; j < cols; ++j){
+				linha_re[j] = matriz_re[i][j];
+				linha_im[j] = matriz_im[i][j];
+			}
 		}
+		
 
 		// Vou fazer a fft de um vector, ou seja unidimensional
 		fft(linha_re,linha_im,cols,inverse);
 
 		/* Preecho as respectivas linha, ou seja, as matrizes
 		 * recebem resultado da transformada */
-		for(j = 0; j < cols; ++j){
-			matriz_re[i][j] = linha_re[j];
-			matriz_im[i][j] = linha_im[j];
+		#pragma omp parallel
+		{
+			#pragma omp for
+			for(j = 0; j < cols; ++j){
+				matriz_re[i][j] = linha_re[j];
+				matriz_im[i][j] = linha_im[j];
+			}
 		}
 	}
 
 	// Calculos para as colunas
-	#pragma omp for
 	for(i = 0; i < cols; ++i){
 
 		/* As colunas da imagem/matriz são passados para os
-		 * vectores coluna */ 
-		for(j = 0; j < rows; ++j){
-			coluna_re[j] = matriz_re[j][i];
-			coluna_im[j] = matriz_im[j][i];
+		 * vectores coluna */
+		#pragma omp parallel
+		{
+			#pragma omp for
+			for(j = 0; j < rows; ++j){
+				coluna_re[j] = matriz_re[j][i];
+				coluna_im[j] = matriz_im[j][i];
+			}
 		}
+		
 
 		// Vou fazer a fft de um vector, ou seja unidimensional
 		fft(coluna_re,coluna_im,rows,inverse);
 
 		/* Preecho as respectivas colunas, ou seja, as matrizes
 		 * recebem resultado da transformada */
-		for(j = 0; j < rows; ++j){
-			matriz_re[j][i] = coluna_re[j];
-			matriz_im[j][i] = coluna_im[j];
+		#pragma omp parallel
+		{
+			#pragma omp for
+			for(j = 0; j < rows; ++j){
+				matriz_re[j][i] = coluna_re[j];
+				matriz_im[j][i] = coluna_im[j];
+			}
 		}
 	}
 
 	// Devolvo a DFT ou IDFT para a estrutura de saída
-	#pragma omp for
 	for(i = 0; i < rows; ++i){
-		for(j = 0; j < cols; ++j){
-			out_re->data[i*cols+j] = matriz_re[i][j];
-			out_img->data[i*cols+j] = matriz_im[i][j];
+		#pragma omp parallel
+		{
+			#pragma omp for
+			for(j = 0; j < cols; ++j){
+				out_re->data[i*cols+j] = matriz_re[i][j];
+				out_img->data[i*cols+j] = matriz_im[i][j];
+			}
 		}
 	}
 }
