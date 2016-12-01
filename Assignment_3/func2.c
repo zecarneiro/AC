@@ -116,45 +116,45 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 
 	// Calculos para as linhas
 	#pragma omp for
-	for(i = 0; i < cols; ++i){
+	for(i = 0; i < rows; ++i){
 
 		/* As linhas da imagem/matriz são passados para os
-		 * vectores linha */ 
-		for(j = 0; j < rows; ++j){
-			linha_re[j] = matriz_re[j][i];
-			linha_im[j] = matriz_im[j][i];
+		 * vectores linhas */
+		for(j = 0; j < cols; ++j){
+			linha_re[j] = matriz_re[i][j];
+			linha_im[j] = matriz_im[i][j];
 		}
 
 		// Vou fazer a fft de um vector, ou seja unidimensional
-		fft(linha_re,linha_im,rows,inverse);
+		fft(linha_re,linha_im,cols,inverse);
 
-		/* Preecho as respectivas linhas, ou seja, as matrizes
+		/* Preecho as respectivas linha, ou seja, as matrizes
 		 * recebem resultado da transformada */
-		for(j = 0; j < rows; ++j){
-			matriz_re[j][i] = linha_re[j];
-			matriz_im[j][i] = linha_im[j];
+		for(j = 0; j < cols; ++j){
+			matriz_re[i][j] = linha_re[j];
+			matriz_im[i][j] = linha_im[j];
 		}
 	}
 
 	// Calculos para as colunas
 	#pragma omp for
-	for(i = 0; i < rows; ++i){
+	for(i = 0; i < cols; ++i){
 
 		/* As colunas da imagem/matriz são passados para os
-		 * vectores coluna */
-		for(j = 0; j < cols; ++j){
-			coluna_re[j] = matriz_re[i][j];
-			coluna_im[j] = matriz_im[i][j];
+		 * vectores coluna */ 
+		for(j = 0; j < rows; ++j){
+			coluna_re[j] = matriz_re[j][i];
+			coluna_im[j] = matriz_im[j][i];
 		}
 
 		// Vou fazer a fft de um vector, ou seja unidimensional
-		fft(coluna_re,coluna_im,cols,inverse);
+		fft(coluna_re,coluna_im,rows,inverse);
 
 		/* Preecho as respectivas colunas, ou seja, as matrizes
 		 * recebem resultado da transformada */
-		for(j = 0; j < cols; ++j){
-			matriz_re[i][j] = coluna_re[j];
-			matriz_im[i][j] = coluna_im[j];
+		for(j = 0; j < rows; ++j){
+			matriz_re[j][i] = coluna_re[j];
+			matriz_im[j][i] = coluna_im[j];
 		}
 	}
 
