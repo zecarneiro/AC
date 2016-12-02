@@ -78,6 +78,10 @@ void fft(double *v_re , double *ve_im, int N, int inv){
 			ve_im[k] = Im[k];
 		}
 	}
+
+	/* Liberto a memória */
+	Re = NULL;
+	Im = NULL;
 }
 
 /* Função que recebe uma matriz real e imaginaria de uma imagem e devolve a DFT
@@ -89,6 +93,13 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	int rows = in_re->rows; // = M
 	int cols = in_re->cols; // = N
 	int i,j;
+
+	/* crio os vectores que vai receber os valores de cada linha e
+	 * de cada coluna*/
+	double *linha_re = (double*)malloc(cols*sizeof(double));
+	double *linha_im = (double*)malloc(cols*sizeof(double));
+	double *coluna_re = (double*)malloc(rows*sizeof(double));
+	double *coluna_im = (double*)malloc(rows*sizeof(double));
 
 	/* Nesta parte pretendo criar uma matriz bidimensional */
 	/* Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
@@ -118,15 +129,6 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 			}
 		}
 	}
-	
-
-
-	/* crio os vectores que vai receber os valores de cada linha e
-	 * de cada coluna*/
-	double *linha_re = (double*)malloc(rows*sizeof(double));
-	double *linha_im = (double*)malloc(rows*sizeof(double));
-	double *coluna_re = (double*)malloc(cols*sizeof(double));
-	double *coluna_im = (double*)malloc(cols*sizeof(double));
 
 	// Calculos para as linhas
 	for(i = 0; i < rows; ++i){
@@ -140,8 +142,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 				linha_re[j] = matriz_re[i][j];
 				linha_im[j] = matriz_im[i][j];
 			}
-		}
-		
+		}		
 
 		// Vou fazer a fft de um vector, ou seja unidimensional
 		fft(linha_re,linha_im,cols,inverse);
@@ -199,4 +200,12 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 			}
 		}
 	}
+
+	/* Liberto a memória */
+	matriz_im = NULL;
+	matriz_re = NULL;
+	linha_re = NULL;
+	linha_im = NULL;
+	coluna_im = NULL;
+	coluna_re = NULL;
 }
