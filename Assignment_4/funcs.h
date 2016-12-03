@@ -26,4 +26,6 @@ ImageF * genlpfmask(int , int);
 void dofilt(ImageF * , ImageF * , ImageF * , ImageF * , ImageF * );
 void fti(ImageF *, ImageF *, ImageF *, ImageF *, int );
 
+void transposta(ImageF *in_re, ImageF *in_img);
+
 struct timespec SubtracaoTempo(struct timespec Inicio, struct timespec Fim);
