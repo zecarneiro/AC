@@ -1,18 +1,4 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
 #include "funcs.h"
-#include "complex.h"
-
-
-#ifdef __OPENMP
-    #include <omp.h>
-#else 
-	#define omp_get_thread_num() 0
-#endif
-
-#define PI 3.14159265359
 
 /* Função que faz a FFT/DFT unidimensional, ou seja,
  * faz a transformada de um vector */
@@ -155,36 +141,6 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 			for(j = 0; j < cols; ++j){
 				matriz_re[i][j] = linha_re[j];
 				matriz_im[i][j] = linha_im[j];
-			}
-		}
-	}
-
-	// Calculos para as colunas
-	for(i = 0; i < cols; ++i){
-
-		/* As colunas da imagem/matriz são passados para os
-		 * vectores coluna */
-		#pragma omp parallel
-		{
-			#pragma omp for
-			for(j = 0; j < rows; ++j){
-				coluna_re[j] = matriz_re[j][i];
-				coluna_im[j] = matriz_im[j][i];
-			}
-		}
-		
-
-		// Vou fazer a fft de um vector, ou seja unidimensional
-		fft(coluna_re,coluna_im,rows,inverse);
-
-		/* Preecho as respectivas colunas, ou seja, as matrizes
-		 * recebem resultado da transformada */
-		#pragma omp parallel
-		{
-			#pragma omp for
-			for(j = 0; j < rows; ++j){
-				matriz_re[j][i] = coluna_re[j];
-				matriz_im[j][i] = coluna_im[j];
 			}
 		}
 	}

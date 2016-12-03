@@ -1,13 +1,10 @@
 
-#include <fcntl.h>
-#include <string.h>
 #ifdef __APPLE__
 #include <netpbm/pam.h>
 #else
 #include <pam.h>
 #endif
 #include "funcs.h"
-#include <math.h>
 
 void teste(ImageF * in, ImageF * out){
     int i,j;

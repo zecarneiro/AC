@@ -111,6 +111,7 @@ int main(int argc, char**argv){
     fti(imginf, imgin_img, out_real, out_imag, 0);
     transposta(out_real, out_imag);
     fti(out_real, out_imag, out_real, out_imag, 0);
+    transposta(out_real, out_imag);
 
     /** multiplica pela mascara */
     printf("\n========= FILTRAGEM");
@@ -121,12 +122,13 @@ int main(int argc, char**argv){
     fti(auxiliar_real, auxiliar_im, out_real, out_imag, 1);
     transposta(out_real, out_imag);
     fti(out_real, out_imag, out_real, out_imag, 1);
+    transposta(out_real, out_imag);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     dif = SubtracaoTempo(begin,end);
 
-    printf("TEMPO DE EXECUÇÃO = %lld.%.9ld", (long long) dif.tv_sec, dif.tv_nsec);
+    printf("TEMPO DE EXECUÇÃO = %lld.%.9ld\n", (long long) dif.tv_sec, dif.tv_nsec);
 
     /** copia para imagem de saida imgout */
     double val_re,val_img,val;

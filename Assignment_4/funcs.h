@@ -3,11 +3,19 @@
 #include <string.h>
 #include <math.h>
 #include <complex.h>
+#include <fcntl.h>
 
 #include <time.h>
 
+#ifdef __OPENMP
+    #include <omp.h>
+#else 
+	#define omp_get_thread_num() 0
+#endif
+
 
 #define UM_SEC 1000000000L
+#define PI 3.14159265359
 
 struct Matrix{
   int rows;

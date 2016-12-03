@@ -18,20 +18,24 @@ void transposta(ImageF *in_re, ImageF *in_img)
 			#pragma omp for
 			for(int j = 0; j < cols; ++j)
             {
-				buffer_re->data[i*cols+j] = in_re->data[i*cols+j];
-				buffer_img->data[i*cols+j] = in_img->data[i*cols+j];
+				buffer_re[i*cols+j] = in_re->data[i*cols+j];
+				buffer_img[i*cols+j] = in_img->data[i*cols+j];
 			}
 		}
+	}
 
-        //transpõe
+    
+    //transpõe
+	for(int i = 0; i < rows; ++i)
+	{
 		#pragma omp parallel
 		{
 			#pragma omp for
 			for(int j = 0; j < cols; ++j)
             {
 
-				in_re->data[j*cols+i] = buffer_re->data[i*cols+j];
-				in_img->data[j*cols+i] = buffer_img->data[i*cols+j];
+				in_re->data[j*cols+i] = buffer_re[i*cols+j];
+				in_img->data[j*cols+i] = buffer_img[i*cols+j];
 			}
 		}
         //muda tamanhos
