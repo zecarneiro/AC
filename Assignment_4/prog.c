@@ -117,6 +117,8 @@ int main(int argc, char**argv){
     /** calcula dft da imagem */
     printf("\n========= DFT");
     fti(imginf, imgin_img, out_real, out_imag, 0);
+    transposta(out_real, out_imag);
+    fti(out_real, out_imag, out_real, out_imag, 0);
 
     /** multiplica pela mascara */
     printf("\n========= FILTRAGEM");
@@ -125,6 +127,8 @@ int main(int argc, char**argv){
     /** calcula dft inversa da imagem filtrada */
     printf("\n========= IDFT\n");
     fti(auxiliar_real, auxiliar_im, out_real, out_imag, 1);
+    transposta(out_real, out_imag);
+    fti(out_real, out_imag, out_real, out_imag, 1);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
