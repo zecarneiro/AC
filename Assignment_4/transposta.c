@@ -10,13 +10,13 @@ void transposta(ImageF *in_re, ImageF *in_img)
 
 	/* Faço a copia das matrizes de entrada e armazeno nas matrizes
 	 * criadas por mim */
-	for(i = 0; i < rows; ++i)
+	for(int i = 0; i < rows; ++i)
     {
         //põe no buffer
         #pragma omp parallel
 		{
 			#pragma omp for
-			for(j = 0; j < cols; ++j)
+			for(int j = 0; j < cols; ++j)
             {
 				buffer_re->data[i*cols+j] = in_re->data[i*cols+j];
 				buffer_img->data[i*cols+j] = in_img->data[i*cols+j];
@@ -27,7 +27,7 @@ void transposta(ImageF *in_re, ImageF *in_img)
 		#pragma omp parallel
 		{
 			#pragma omp for
-			for(j = 0; j < cols; ++j)
+			for(int j = 0; j < cols; ++j)
             {
 
 				in_re->data[j*cols+i] = buffer_re->data[i*cols+j];
