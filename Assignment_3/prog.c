@@ -4,6 +4,9 @@
 #include <math.h>
 #include <complex.h>
 #include "funcs.h"
+#include <time.h>
+
+
 
 int main(int argc, char**argv){
     
@@ -103,6 +106,10 @@ int main(int argc, char**argv){
 
     ImageF *out_mask = NULL;
 
+    struct timespec begin, end, dif;
+
+    clock_gettime(CLOCK_MONOTONIC, &begin);
+
     /** cria mascara **/
     printf("\n\n========= MASCARA");
     out_mask=genlpfmask(imginf->rows,imginf->cols);
@@ -118,6 +125,12 @@ int main(int argc, char**argv){
     /** calcula dft inversa da imagem filtrada */
     printf("\n========= IDFT\n");
     fti(auxiliar_real, auxiliar_im, out_real, out_imag, 1);
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    dif = SubtracaoTempo(begin,end);
+
+    printf("TEMPO DE EXECUÇÃO = %lld.%.9ld", (long long) dif.tv_sec, dif.tv_nsec);
 
     /** copia para imagem de saida imgout */
     double val_re,val_img,val;

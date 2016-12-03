@@ -1,4 +1,6 @@
 
+#define UM_SEC 1000000000L
+
 struct Matrix{
   int rows;
   int cols;
@@ -23,3 +25,5 @@ void teste(ImageF * in, ImageF * out);
 ImageF * genlpfmask(int , int);
 void dofilt(ImageF * , ImageF * , ImageF * , ImageF * , ImageF * );
 void fti(ImageF *, ImageF *, ImageF *, ImageF *, int );
+
+struct timespec SubtracaoTempo(struct timespec Inicio, struct timespec Fim);

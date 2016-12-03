@@ -71,4 +71,32 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
             }
         }   
     }
-}   
+}  
+
+
+struct timespec SubtracaoTempo(struct timespec Inicio, struct timespec Fim)
+{
+	struct timespec Resultado;
+
+	if ((Fim.tv_sec < Inicio.tv_sec) || ((Fim.tv_sec == Inicio.tv_sec) && (Fim.tv_nsec <= Inicio.tv_nsec)))
+    // Verifica se o tempo de fim é menor que o tempo de início | (exemplos) Primeiro para o caso de (fim) 0 < 1 (início) e depois para 0.002 <= 0.005
+    {
+		Resultado.tv_sec = Resultado.tv_nsec = 0;
+	}
+	else
+    // Caso fim > início, é calculado o tempo de processamento
+    {
+		Resultado.tv_sec = Fim.tv_sec - Inicio.tv_sec;
+
+		if (Fim.tv_nsec < Inicio.tv_nsec)
+        {
+			Resultado.tv_nsec = Fim.tv_nsec + UM_SEC - Inicio.tv_nsec;
+			Resultado.tv_sec--;
+		}
+		else
+        {
+			Resultado.tv_nsec = Fim.tv_nsec - Inicio.tv_nsec;
+		}
+	}
+	return (Resultado);
+}
