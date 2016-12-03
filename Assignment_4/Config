@@ -1,0 +1,21 @@
+Config:
+Deec_Labs: ssh axxx@10.10.128.20
+Fora: ssh axx@lsrc.deec.uc.pt
+
+Depois de entrar no 20 fazer login em cada uma das maquinas:
+	1 - ssh ip
+	2 - ssh-keygen -t rsa
+	3 - cat .ssh/id_rsa.pub >> authorized_keys
+	4 - logout
+
+
+IPs
+10.10.128.6
+10.10.128.7
+10.10.128.8
+10.10.128.9
+10.10.128.16
+10.10.128.17
+
+10.10.128.18
+10.10.128.19
