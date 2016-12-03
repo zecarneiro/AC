@@ -2,8 +2,8 @@
 
 void transposta(ImageF *in_re, ImageF *in_img)
 {
-    int rows = Real->rows; // = M
-	int cols = Real->cols; // = N
+    int rows = in_re->rows; // = M
+	int cols = in_re->cols; // = N
     
     double *buffer_re = (double*)malloc(rows*cols*sizeof(double));
     double *buffer_img = (double*)malloc(cols*rows*sizeof(double));
@@ -27,12 +27,19 @@ void transposta(ImageF *in_re, ImageF *in_img)
 		#pragma omp parallel
 		{
 			#pragma omp for
-			for(j = 0; j < cols; ++j){
-                
+			for(j = 0; j < cols; ++j)
+            {
+
 				in_re->data[j*cols+i] = buffer_re->data[i*cols+j];
 				in_img->data[j*cols+i] = buffer_img->data[i*cols+j];
 			}
 		}
+        //muda tamanhos
+        in_re->rows = cols;
+        in_re->cols = rows;
+        in_img->rows = cols;
+        in_img->cols = rows;
+
 	}
 
 }
