@@ -99,6 +99,7 @@ int main(int argc, char**argv){
     ImageF *out_mask = NULL;
 
     struct timespec begin, end, dif;
+    int rank,nprocs,n_linha,dest;
 
     clock_gettime(CLOCK_MONOTONIC, &begin);
 
@@ -108,8 +109,76 @@ int main(int argc, char**argv){
         
     /** calcula dft da imagem */
     printf("\n========= DFT");
-    fti(imginf, imgin_img, out_real, out_imag, 0);
-    transposta(out_real, out_imag);
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
+
+    /* Testa para verificar se a divisão por numero de processos
+     * é par ou impar */
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if(rank == 0){
+        if((imginf->rows%nprocs) == 0){
+            MEnv->rows = imginf->rows/nprocs;
+            MEnv->cols = imginf->cols;
+
+            /* Nesta parte pretendo criar uma matriz bidimensional */
+            /* Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
+            MEnv->matriz_re = (double**)malloc(MEnv->rows*sizeof(double*));
+            MEnv->matriz_im = (double**)malloc(MEnv->rows*sizeof(double*));
+
+            #pragma omp parallel
+            {
+                #pragma omp for
+                for(i = 0; i < imginf->rows; ++i){
+                    MEnv->matriz_re[i] = (double*)malloc(MEnv->cols*sizeof(double));
+                    MEnv->matriz_im[i] = (double*)malloc(MEnv->cols*sizeof(double));
+                }
+            }
+        }
+        else{
+            MEnv->rows = imginf->rows/nprocs;
+            MEnv->cols = imginf->cols;
+
+            /* Nesta parte pretendo criar uma matriz bidimensional */
+            /* Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
+            MEnv->matriz_re = (double**)malloc(MEnv->rows*sizeof(double*));
+            MEnv->matriz_im = (double**)malloc(MEnv->rows*sizeof(double*));
+
+            #pragma omp parallel
+            {
+                #pragma omp for
+                for(i = 0; i < imginf->rows; ++i){
+                    MEnv->matriz_re[i] = (double*)malloc(MEnv->cols*sizeof(double));
+                    MEnv->matriz_im[i] = (double*)malloc(MEnv->cols*sizeof(double));
+                }
+            }
+        }
+
+        /* Fazemos a DFT para as linhas */
+        for(i = 0, dest = 1; i < imginf->rows; ++i){
+            /* Faço a copia das matrizes de entrada e armazeno nas matrizes
+             * criadas por mim */
+            for(j = 0; j < imginf->cols; ++j){
+                MEnv->matriz_re[i][j] = imginf->data[i*imginf->cols+j];
+                MEnv->matriz_im[i][j] = imgin_img->data[i*imginf->cols+j];
+            }
+
+            if(i = completo){
+                MPI_Send(&matriz_re,&matriz_im, );
+            }
+        }
+
+        transposta(out_real, out_imag);
+    }
+
+    if(rank != 0){
+        MPI_Recv();
+        fti(imginf, imgin_img, out_real, out_imag, 0);
+    }
+
+    MPI_Finalize();
+
     fti(out_real, out_imag, out_real, out_imag, 0);
     transposta(out_real, out_imag);
 
@@ -123,6 +192,8 @@ int main(int argc, char**argv){
     transposta(out_real, out_imag);
     fti(out_real, out_imag, out_real, out_imag, 1);
     transposta(out_real, out_imag);
+
+    MPI_Finalize();
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 

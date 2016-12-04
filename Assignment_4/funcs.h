@@ -4,6 +4,7 @@
 #include <math.h>
 #include <complex.h>
 #include <fcntl.h>
+#include "mpi.h"
 
 #include <time.h>
 
@@ -31,7 +32,15 @@ struct MatrixF{
   double * data;
   int widthStep;
 };
-typedef struct MatrixF ImageF; 
+typedef struct MatrixF ImageF;
+
+struct MatrixEnv{
+  int rows;
+  int cols;
+  double **matriz_re;
+  double **matriz_im;
+};
+typedef struct MatrixEnv MEnv; 
 
 Image * loadPBM(char * fname);
 void savePBM(char * fname, Image * image);
