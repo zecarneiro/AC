@@ -263,11 +263,16 @@ void Envia_Dados(MEnv *m_env, ImageF *in_re, ImageF *in_im, int n_process, Image
     for(dest = 1; dest < n_process; ++ dest){
         /* Fazemos a DFT para as linhas */
         for(i = 0; i < m_env->rows; ++i){
+            
             /* Faço a copia das matrizes de entrada e armazeno nas matrizes
              * criadas por mim */
-            for(j = 0; j < in_re->cols; ++j){
-                m_env->matriz_re[i][j] = in_re->data[linha*in_re->cols+j];
-                m_env->matriz_im[i][j] = in_im->data[linha*in_im->cols+j];
+            #pragma omp parallel
+            {
+                #pragma omp for
+                for(j = 0; j < in_re->cols; ++j){
+                    m_env->matriz_re[i][j] = in_re->data[linha*in_re->cols+j];
+                    m_env->matriz_im[i][j] = in_im->data[linha*in_im->cols+j];
+                }
             }
             ++linha;
         }
@@ -285,15 +290,18 @@ void Envia_Dados(MEnv *m_env, ImageF *in_re, ImageF *in_im, int n_process, Image
         int linhas_finais = ((n_process - 1)*m_env->rows) + 1;
 
         /* Preenche a matriz que vai ser usada */
-        i = linhas_finais;
-        while(i < in_re->rows){
+        for(i = linhas_finais; i < in_re->rows; ++i){
+
             /* Faço a copia das matrizes de entrada e armazeno nas matrizes
              * criadas por mim */
-            for(j = 0; j < in_re->cols; ++j){
-                m_env->matriz_re[i][j] = in_re->data[i*in_re->cols+j];
-                m_env->matriz_im[i][j] = in_im->data[i*in_im->cols+j];
+            #pragma omp parallel
+            {
+                #pragma omp for
+                for(j = 0; j < in_re->cols; ++j){
+                    m_env->matriz_re[i][j] = in_re->data[i*in_re->cols+j];
+                    m_env->matriz_im[i][j] = in_im->data[i*in_im->cols+j];
+                }
             }
-            ++i;
         }
         m_env->rows = in_re->rows - m_env->rows;
 
@@ -302,11 +310,16 @@ void Envia_Dados(MEnv *m_env, ImageF *in_re, ImageF *in_im, int n_process, Image
 
         /* Preenche a matriz de saida */
         for(i = linhas_finais; i < in_re->rows; ++i){
+
             /* Faço a copia das matrizes de entrada e armazeno nas matrizes
              * criadas por mim */
-            for(j = 0; j < in_re->cols; ++j){
-                ou_re->data[i*ou_re->cols+j] = m_env->matriz_re[i][j];
-                ou_im->data[i*ou_im->cols+j] = m_env->matriz_im[i][j];
+            #pragma omp parallel
+            {
+                #pragma omp for
+                for(j = 0; j < in_re->cols; ++j){
+                    ou_re->data[i*ou_re->cols+j] = m_env->matriz_re[i][j];
+                    ou_im->data[i*ou_im->cols+j] = m_env->matriz_im[i][j];
+                }
             }
         }
     }
@@ -331,11 +344,16 @@ void Recebe_Dados(MEnv *m_rec, ImageF *ou_re, ImageF *ou_im, int NUM_Proc){
         
         /* Fazemos a DFT para as linhas */
         for(i = 0; i < m_rec->rows; ++i){
+
             /* Faço a copia das matrizes de entrada e armazeno nas matrizes
              * criadas por mim */
-            for(j = 0; j < ou_re->cols; ++j){
-                ou_re->data[linha*ou_re->cols+j] = m_rec->matriz_re[i][j];
-                ou_im->data[linha*ou_im->cols+j] = m_rec->matriz_im[i][j];
+            #pragma omp parallel
+            {
+                #pragma omp for
+                for(j = 0; j < ou_re->cols; ++j){
+                    ou_re->data[linha*ou_re->cols+j] = m_rec->matriz_re[i][j];
+                    ou_im->data[linha*ou_im->cols+j] = m_rec->matriz_im[i][j];
+                }
             }
             ++linha;
         }
