@@ -1,11 +1,6 @@
-all: prog progOMP
+prog_mpi_omp: prog.c funcs.h
 
-prog: prog.c funcs.c func1.c func2.c funcs.h
-	gcc -g  prog.c funcs.c func1.c func2.c transposta.c -lm  -lnetpbm -o prog
-
-progOMP: prog.c funcs.c funcs.h
-	gcc  prog.c funcs.c func1.c func2.c transposta.c -lm -lnetpbm  -fopenmp -o progOMP
-
+	mpicc funcs.c func1.c func2.c transposta.c -lm -lnetpbm  -fopenmp −o prog_mpi_omp
 
 clean:
-	rm -f prog progOMP
+	rm -f  prog_mpi_omp
