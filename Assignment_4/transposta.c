@@ -38,12 +38,11 @@ void transposta(ImageF *in_re, ImageF *in_img)
 				in_img->data[j*cols+i] = buffer_img[i*cols+j];
 			}
 		}
-        //muda tamanhos
-        in_re->rows = cols;
-        in_re->cols = rows;
-        in_img->rows = cols;
-        in_img->cols = rows;
-
 	}
 
+	//muda tamanhos
+    in_re->rows = cols;
+    in_re->cols = rows;
+    in_img->rows = cols;
+    in_img->cols = rows;
 }
