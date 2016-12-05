@@ -34,15 +34,6 @@ struct MatrixF{
 };
 typedef struct MatrixF ImageF;
 
-struct MatrixEnv{
-  int rows;
-  int cols;
-  int inverso;
-  double **matriz_re;
-  double **matriz_im;
-}; 
-typedef struct MatrixEnv MEnv;
-
 Image * loadPBM(char * fname);
 void savePBM(char * fname, Image * image);
 void teste(ImageF * in, ImageF * out);

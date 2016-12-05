@@ -1,8 +1,9 @@
 #include "funcs.h"
 
+void aloca_matriz(ImageF *, ImageF *, int, int, int);
 int acha_n_linhas(int, int);
-void Envia_Dados(MEnv *, ImageF *, ImageF *, int , ImageF *, ImageF *);
-void Recebe_Dados(MEnv *, ImageF *, ImageF *, int );
+void Envia_Dados(ImageF *, ImageF *, ImageF *, ImageF *, int, int, ImageF *, ImageF *);
+void Recebe_Dados(ImageF *, ImageF *, ImageF *, ImageF *, int, MPI_Status *);
 
 int main(int argc, char**argv){
     
@@ -19,7 +20,7 @@ int main(int argc, char**argv){
 	printf("Uso: %s <imagem_in.bmp> <imagem_flt.bmp>\n",argv[0]);
 	exit(1);
     }
-  
+
     strcpy(fnamein,argv[1]);
     strcpy(fnameout,argv[2]);
     imgin=loadPBM(fnamein);
@@ -108,82 +109,80 @@ int main(int argc, char**argv){
 
     /* Inicio do MPI */
     MPI_Status status;
+    ImageF *matriz_re;
+    ImageF *matriz_im;
+
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD,&nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     /* Se for o processo mãe */
     if(rank == 0){
+    	printf("\n\n%d\n\n\n",nprocs);
+    	int inverso;
+
         struct timespec begin, end, dif;
         clock_gettime(CLOCK_MONOTONIC, &begin);
 
         /** cria mascara **/
-        printf("\n\n========= MASCARA");
-        out_mask=genlpfmask(imginf->rows,imginf->cols);
-            
+	    printf("\n\n========= MASCARA");
+	    out_mask=genlpfmask(imginf->rows,imginf->cols);
+        
+        /**************************************************************
+         *************************** DFT *****************************/
+
         /** calcula dft da imagem */
-        printf("\n========= DFT");        
-        MEnv->rows = imginf->rows;
-        MEnv->cols = imginf->cols;
-        MEnv->rows = acha_n_linhas(MEnv->rows,nprocs);
-
-        /* Nesta parte pretendo criar uma matriz bidimensional */
-        /* Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
-        MEnv->matriz_re = (double**)malloc(MEnv->rows*sizeof(double*));
-        MEnv->matriz_im = (double**)malloc(MEnv->rows*sizeof(double*));
-
-        #pragma omp parallel
-        {
-            #pragma omp for
-            for(i = 0; i < imginf->rows; ++i){
-                MEnv->matriz_re[i] = (double*)malloc(MEnv->cols*sizeof(double));
-                MEnv->matriz_im[i] = (double*)malloc(MEnv->cols*sizeof(double));
-            }
-        }
+        printf("\n========= DFT");
+        inverso = 0;
+        aloca_matriz(matriz_re, matriz_im, imginf->rows, imginf->cols, nprocs);
 
         /* É feito o calculos para as linhas */
-        Envia_Dados(imginf, imgin, MEnv, nprocs, out_real, out_imag);
-        Recebe_Dados(MEnv, out_real, out_imag, nprocs);
+        Envia_Dados(imginf, imgin_img, matriz_re, matriz_im, inverso, nprocs, out_real, out_imag);
+        Recebe_Dados(matriz_re, matriz_im, out_real, out_imag, nprocs, &status);
 
         /* Faço a transposta para de forma a se fazer os calculos para as colunas */
         transposta(out_real, out_imag);
-        MEnv->rows = out_real->rows;
-        MEnv->cols = out_real->cols;
-        MEnv->rows = acha_n_linhas(MEnv->rows,nprocs);
+        aloca_matriz(matriz_re, matriz_im, out_real->rows, out_real->cols, nprocs);
 
         /* É feito o calculos para as colunas */
-        Envia_Dados(imginf, imgin, MEnv, nprocs, out_real, out_imag);
-        Recebe_Dados(MEnv, out_real, out_imag, nprocs);
-
+        Envia_Dados(imginf, imgin_img, matriz_re, matriz_im, inverso, nprocs, out_real, out_imag);
+        Recebe_Dados(matriz_re, matriz_im, out_real, out_imag, nprocs, &status);
+        
         /* Faço outra vez a transposta de forma a que a matriz fique igual a original */
         transposta(out_real, out_imag);
+
+        /**************************************************************
+         *************************** FILTRAGEM ***********************/
 
         /** multiplica pela mascara */
         printf("\n========= FILTRAGEM");
         dofilt(out_real, out_imag, out_mask, auxiliar_real, auxiliar_im);
 
+        /**************************************************************
+         *************************** IDFT ****************************/
+
         /** calcula dft inversa da imagem filtrada */
         printf("\n========= IDFT\n");
-        MEnv->rows = out_real->rows;
-        MEnv->cols = out_real->cols;
-        MEnv->rows = acha_n_linhas(MEnv->rows,nprocs);
+        inverso = 1;
+        aloca_matriz(matriz_re, matriz_im, out_real->rows, out_real->cols, nprocs);
 
         /* É feito o calculos para as linhas */
-        Envia_Dados(imginf, imgin, MEnv, nprocs, out_real, out_imag);
-        Recebe_Dados(MEnv, out_real, out_imag, nprocs);
+        Envia_Dados(imginf, imgin_img, matriz_re, matriz_im, inverso, nprocs, out_real, out_imag);
+        Recebe_Dados(matriz_re, matriz_im, out_real, out_imag, nprocs, &status);
 
         /* Faço a transposta para de forma a se fazer os calculos para as colunas */
         transposta(out_real, out_imag);
-        MEnv->rows = out_real->rows;
-        MEnv->cols = out_real->cols;
-        MEnv->rows = acha_n_linhas(MEnv->rows,nprocs);
+        aloca_matriz(matriz_re, matriz_im, out_real->rows, out_real->cols, nprocs);
 
         /* É feito o calculos para as colunas */
-        Envia_Dados(imginf, imgin, MEnv, nprocs, out_real, out_imag);
-        Recebe_Dados(MEnv, out_real, out_imag, nprocs);
+        Envia_Dados(imginf, imgin_img, matriz_re, matriz_im, inverso, nprocs, out_real, out_imag);
+        Recebe_Dados(matriz_re, matriz_im, out_real, out_imag, nprocs, &status);
 
         /* Faço outra vez a transposta de forma a que a matriz fique igual a original */
         transposta(out_real, out_imag);
+
+        /**************************************************************
+         *************************** OUTROS **************************/
 
         clock_gettime(CLOCK_MONOTONIC, &end);
         dif = SubtracaoTempo(begin,end);
@@ -210,22 +209,55 @@ int main(int argc, char**argv){
 
     /* Se for outros processos */
     if(rank != 0){
-        /* Recebe os Dados do processo mãe */
-        MPI_Recv(MEnv->matriz_re, MEnv->rows*MEnv->cols, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(MEnv->matriz_im, MEnv->rows*MEnv->cols, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&MEnv->rows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&MEnv->rows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&MEnv->inverso, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-        
-        /* Calcula a DFT ou IDFT */
-        fti(MEnv->matriz_re, MEnv->matriz_im, MEnv->matriz_re, MEnv->matriz_im, MEnv->inverso);
+    	int inverso;
 
-        /* Envia os Dados do processo mãe */
-        MPI_Send(MEnv->matriz_re, MEnv->rows*MEnv->cols, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(MEnv->matriz_im, MEnv->rows*MEnv->cols, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(&MEnv->rows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(&MEnv->cols, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        MPI_Send(&MEnv->inverso, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    	while(1){
+    		/* Recebe os Dados do processo mãe */
+
+	    	/* Recebe da matriz real */
+	    	MPI_Recv(&matriz_re->rows, 1, MPI_INT, 0, 99, MPI_COMM_WORLD, &status);
+	        MPI_Recv(&matriz_re->cols, 1, MPI_INT, 0, 98, MPI_COMM_WORLD, &status);
+
+	        /* Nesta parte pretendo criar uma matriz bidimensional
+		     * Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
+		    matriz_re->data = (double*)malloc(matriz_re->rows*matriz_re->cols*sizeof(double));
+	        MPI_Recv(matriz_re->data, matriz_re->rows*matriz_re->cols, MPI_DOUBLE, 0, 97, MPI_COMM_WORLD, &status);
+
+	        /* Recebe da matriz imaginaria */
+	        MPI_Recv(&matriz_im->rows, 1, MPI_INT, 0, 96, MPI_COMM_WORLD, &status);
+	        MPI_Recv(&matriz_im->cols, 1, MPI_INT, 0, 95, MPI_COMM_WORLD, &status);
+
+	        /* Nesta parte pretendo criar uma matriz bidimensional
+		     * Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
+		    matriz_im->data = (double*)malloc(matriz_im->rows*matriz_im->cols*sizeof(double));
+	        MPI_Recv(matriz_im->data, matriz_im->rows*matriz_im->cols, MPI_DOUBLE, 0, 94, MPI_COMM_WORLD, &status);
+
+	        /* Recebe a informação se é para fazer a DFT ou a IDFT */
+	        MPI_Recv(&inverso, 1, MPI_INT, 0, 93, MPI_COMM_WORLD, &status);
+	        
+	        /* Calcula a DFT ou IDFT */
+	        fti(matriz_re, matriz_im, matriz_re, matriz_im, inverso);
+
+	        /* Envia os Dados do processo mãe */
+
+	        /* Envia a matriz real */
+	        MPI_Send(matriz_re->data, matriz_re->rows*matriz_re->cols, MPI_DOUBLE, 0, 99, MPI_COMM_WORLD);
+	        MPI_Send(&matriz_re->rows, 1, MPI_INT, 0, 98, MPI_COMM_WORLD);
+	        MPI_Send(&matriz_re->cols, 1, MPI_INT, 0, 97, MPI_COMM_WORLD);
+
+	        /* Envia a matriz imaginaria */
+	        MPI_Send(matriz_im->data, matriz_im->rows*matriz_im->cols, MPI_DOUBLE, 0, 96, MPI_COMM_WORLD);
+	        MPI_Send(&matriz_im->rows, 1, MPI_INT, 0, 95, MPI_COMM_WORLD);
+	        MPI_Send(&matriz_im->cols, 1, MPI_INT, 0, 94, MPI_COMM_WORLD);
+
+	        printf("\n%d\n",rank);
+
+	        matriz_re->data = NULL;
+	        matriz_im->data = NULL;
+
+	        if(inverso == 1)
+	        	break;
+    	}
     }
 
     MPI_Finalize();    
@@ -234,116 +266,155 @@ int main(int argc, char**argv){
 
 /* Função usada para se o bter o numero de linhas que cada
  * processo vai calcular */
-void acha_n_linhas(int rows,int NUM_Proc){
-    NUM_Proc -= 1;
+int acha_n_linhas(int rows,int NUM_Proc){
     if((rows%NUM_Proc) == 0){
         rows = rows/NUM_Proc;
         
     }
 
-    else{
-        rows -= 1;
-        
+    else{        
         while(1){
-            if((rows%nprocs) == 0){
-                rows = rows/nprocs;
+        	rows -= 1;
+            if((rows%NUM_Proc) == 0){
+                rows = rows/NUM_Proc;
                 break;
             }
-
-            rows -= 1;
         }
     }
     return rows;
 }
 
-void Envia_Dados(MEnv *m_env, ImageF *in_re, ImageF *in_im, int n_process, ImageF *ou_re, ImageF *ou_im){
-    int dest,i,j,linha;
+void aloca_matriz(ImageF *in_re, ImageF *in_im, int rows, int cols, int NUM_Proc){
+	in_re->data = NULL;
+	in_im->data = NULL;
+
+    in_re->rows = rows;
+    in_re->cols = cols;
+    in_re->rows = acha_n_linhas(in_re->rows,NUM_Proc);
+
+    in_im->rows = in_re->rows;
+    in_im->cols = cols;        
+
+    /* Nesta parte pretendo criar uma matriz bidimensional
+     * Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
+    in_re->data = (double*)malloc(in_re->rows*in_re->cols*sizeof(double));
+    in_im->data = (double*)malloc(in_im->rows*in_im->cols*sizeof(double));
+}
+
+void Envia_Dados(ImageF *in_re, ImageF *in_im, ImageF *env_re, ImageF *env_im, int inv, int n_process, ImageF *ou_re, ImageF *ou_im){
+    int dest,i,j,linha,linhas_finais;
 
     linha = 0;
-    for(dest = 1; dest < n_process; ++ dest){
+    for(dest = 1; dest < n_process; ++dest){
         /* Fazemos a DFT para as linhas */
-        for(i = 0; i < m_env->rows; ++i){
-            
+        for(i = 0; i < env_re->rows; ++i){            
             /* Faço a copia das matrizes de entrada e armazeno nas matrizes
              * criadas por mim */
             #pragma omp parallel
             {
                 #pragma omp for
                 for(j = 0; j < in_re->cols; ++j){
-                    m_env->matriz_re[i][j] = in_re->data[linha*in_re->cols+j];
-                    m_env->matriz_im[i][j] = in_im->data[linha*in_im->cols+j];
+                    env_re->data[i*env_re->cols+j] = in_re->data[linha*in_re->cols+j];
+                    env_im->data[i*env_im->cols+j] = in_im->data[linha*in_im->cols+j];
                 }
             }
-            ++linha;
-        }
+            linha++;
+        } 
 
-        MPI_Send(m_env->matriz_re, m_env->rows*m_env->cols, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
-        MPI_Send(m_env->matriz_im, m_env->rows*m_env->cols, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
-        MPI_Send(&m_env->rows, 1, MPI_INT, dest, 0, MPI_COMM_WORLD);
-        MPI_Send(&m_env->cols, 1, MPI_INT, dest, 0, MPI_COMM_WORLD);
-        MPI_Send(&m_env->inverso, 1, MPI_INT, dest, 0, MPI_COMM_WORLD);
+        /* Envia a matriz real */
+        MPI_Send(&env_re->rows, 1, MPI_INT, dest, 99, MPI_COMM_WORLD);
+        MPI_Send(&env_re->cols, 1, MPI_INT, dest, 98, MPI_COMM_WORLD);
+        MPI_Send(env_re->data, env_re->rows*env_re->cols, MPI_DOUBLE, dest, 97, MPI_COMM_WORLD);       
+
+        /* Envia a matriz imaginaria */
+        MPI_Send(&env_im->rows, 1, MPI_INT, dest, 96, MPI_COMM_WORLD);
+        MPI_Send(&env_im->cols, 1, MPI_INT, dest, 95, MPI_COMM_WORLD);
+        MPI_Send(env_im->data, env_im->rows*env_im->cols, MPI_DOUBLE, dest, 94, MPI_COMM_WORLD);
+
+        /* Envia a informação se é para fazer a DFT ou a IDFT */
+        MPI_Send(&inv, 1, MPI_INT, dest, 93, MPI_COMM_WORLD);
     }
 
-    /* Caso ainda faltam linhas para fazer, então a matriz mãe
-     * faz os calculos */
-    if((in_re->rows - m_env->rows) > 0){
-        int linhas_finais = ((n_process - 1)*m_env->rows) + 1;
+    printf("passou\n");
 
-        /* Preenche a matriz que vai ser usada */
-        for(i = linhas_finais; i < in_re->rows; ++i){
+    /* A Computador principal vai calcular a DFT ou a IDFT das linhas
+     * que faltam */  
+    linhas_finais = in_re->rows - linha;
+    
+    env_re->data = NULL;
+    env_im->data = NULL;
+    env_re->rows = linhas_finais;
+    env_re->cols = in_re->cols;
+    env_im->rows = env_re->rows;
+    env_im->cols = in_im->cols;
+    
+    /* Nesta parte pretendo criar uma matriz bidimensional
+     * Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
+    env_re->data = (double*)malloc(in_re->rows*in_re->cols*sizeof(double));
+    env_im->data = (double*)malloc(in_im->rows*in_im->cols*sizeof(double));
 
-            /* Faço a copia das matrizes de entrada e armazeno nas matrizes
-             * criadas por mim */
-            #pragma omp parallel
-            {
-                #pragma omp for
-                for(j = 0; j < in_re->cols; ++j){
-                    m_env->matriz_re[i][j] = in_re->data[i*in_re->cols+j];
-                    m_env->matriz_im[i][j] = in_im->data[i*in_im->cols+j];
-                }
+    linhas_finais = linha;
+
+    /* Preenche a matriz que vai ser usada */
+    for(i = 0; i < env_re->rows; ++i){
+
+        /* Faço a copia das matrizes de entrada e armazeno nas matrizes
+         * criadas por mim */
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for(j = 0; j < in_re->cols; ++j){
+                env_re->data[i*env_re->cols+j] = in_re->data[linha*in_re->cols+j];
+                env_im->data[i*env_im->cols+j] = in_im->data[linha*in_im->cols+j];
             }
         }
-        m_env->rows = in_re->rows - m_env->rows;
+        linha++;
+    }
 
-        /* Calcula a DFT */
-        fti(m_env->matriz_re, m_env->matriz_im, m_env->matriz_re, m_env->matriz_im, m_env->inverso);
+    /* Calcula a DFT ou a IDFT */
+    fti(env_re, env_im, env_re, env_im, inv);
 
-        /* Preenche a matriz de saida */
-        for(i = linhas_finais; i < in_re->rows; ++i){
+    linha = linhas_finais;
+    /* Preenche a matriz de saida */
+    for(i = 0; i < in_re->rows; ++i){
 
-            /* Faço a copia das matrizes de entrada e armazeno nas matrizes
-             * criadas por mim */
-            #pragma omp parallel
-            {
-                #pragma omp for
-                for(j = 0; j < in_re->cols; ++j){
-                    ou_re->data[i*ou_re->cols+j] = m_env->matriz_re[i][j];
-                    ou_im->data[i*ou_im->cols+j] = m_env->matriz_im[i][j];
-                }
+        /* Faço a copia das matrizes de entrada e armazeno nas matrizes
+         * criadas por mim */
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for(j = 0; j < ou_re->cols; ++j){
+                ou_re->data[linha*ou_re->cols+j] = env_re->data[i*env_re->cols+j];
+                ou_im->data[linha*ou_im->cols+j] = env_im->data[i*env_im->cols+j];
             }
         }
+        linha++;
     }
 }
 
-void Recebe_Dados(MEnv *m_rec, ImageF *ou_re, ImageF *ou_im, int NUM_Proc){
+void Recebe_Dados(ImageF *rec_re, ImageF *rec_im, ImageF *ou_re, ImageF *ou_im, int NUM_Proc, MPI_Status *status){
     int dest,i,j,linha;
 
     for(dest = 1; dest < NUM_Proc; ++dest){
-        MPI_Recv(m_rec->matriz_re, m_rec->rows*m_rec->cols, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(m_rec->matriz_im, m_rec->rows*m_rec->cols, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&m_rec->rows, 1, MPI_INT, dest, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&m_rec->rows, 1, MPI_INT, dest, 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&m_rec->inverso, 1, MPI_INT, dest, 0, MPI_COMM_WORLD, &status);
+    	/* Recebe a matriz real */
+        MPI_Recv(rec_re->data, rec_re->rows*rec_re->cols, MPI_DOUBLE, dest, 99, MPI_COMM_WORLD, status);
+        MPI_Recv(&rec_re->rows, 1, MPI_INT, dest, 98, MPI_COMM_WORLD, status);
+        MPI_Recv(&rec_re->cols, 1, MPI_INT, dest, 97, MPI_COMM_WORLD, status);
+
+        /* Recebe a matriz imaginaria */
+        MPI_Recv(rec_im->data, rec_re->rows*rec_re->cols, MPI_DOUBLE, dest, 96, MPI_COMM_WORLD, status);
+        MPI_Recv(&rec_im->rows, 1, MPI_INT, dest, 95, MPI_COMM_WORLD, status);
+        MPI_Recv(&rec_im->cols, 1, MPI_INT, dest, 94, MPI_COMM_WORLD, status);
 
         if(dest == 1){
             linha = 0;
         }
         else{
-            linha = dest*m_rec->rows + 1;
+            linha = dest*rec_re->rows + 1;
         }
         
         /* Fazemos a DFT para as linhas */
-        for(i = 0; i < m_rec->rows; ++i){
+        for(i = 0; i < rec_re->rows; ++i){
 
             /* Faço a copia das matrizes de entrada e armazeno nas matrizes
              * criadas por mim */
@@ -351,11 +422,11 @@ void Recebe_Dados(MEnv *m_rec, ImageF *ou_re, ImageF *ou_im, int NUM_Proc){
             {
                 #pragma omp for
                 for(j = 0; j < ou_re->cols; ++j){
-                    ou_re->data[linha*ou_re->cols+j] = m_rec->matriz_re[i][j];
-                    ou_im->data[linha*ou_im->cols+j] = m_rec->matriz_im[i][j];
+                    ou_re->data[linha*ou_re->cols+j] = rec_re->data[i*rec_re->cols+j];
+                    ou_im->data[linha*ou_im->cols+j] = rec_im->data[i*rec_im->cols+j];
                 }
             }
-            ++linha;
+            linha++;
         }
     }
 }

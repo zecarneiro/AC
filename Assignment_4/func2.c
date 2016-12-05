@@ -74,11 +74,12 @@ void fft(double *v_re , double *ve_im, int N, int inv){
  * ou IDFT da mesma imagem/matriz */
 void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inverse)
 {
-
 	//store size
 	int rows = in_re->rows; // = M
 	int cols = in_re->cols; // = N
 	int i,j;
+
+	printf("\n%d %d\n",rows,cols);
 
 	/* crio os vectores que vai receber os valores de cada linha e
 	 * de cada coluna*/
