@@ -5,6 +5,8 @@ ImageF * genlpfmask(int rows, int cols)
 {
     //Definição da matriz de filtragem
 
+    printf("\nEntra no gera mascara\n");
+
     ImageF *matriz = NULL;
 
     matriz = malloc(sizeof(ImageF));
@@ -41,7 +43,6 @@ ImageF * genlpfmask(int rows, int cols)
                     {
                         matriz->data[r*cols+c] = 0; //preenche preto 
                     }
-                        
                 }
             }   
         }
@@ -50,6 +51,7 @@ ImageF * genlpfmask(int rows, int cols)
 
 void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, ImageF * out_im)
 {
+    printf("\nEntra no dofilt\n");
     int rows = mask->rows;
     int cols = mask->cols;
 

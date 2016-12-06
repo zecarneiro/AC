@@ -72,14 +72,12 @@ void fft(double *v_re , double *ve_im, int N, int inv){
 
 /* Função que recebe uma matriz real e imaginaria de uma imagem e devolve a DFT
  * ou IDFT da mesma imagem/matriz */
-void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inverse)
+void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inverse, int n_linha, int linha_max)
 {
 	//store size
 	int rows = in_re->rows; // = M
 	int cols = in_re->cols; // = N
 	int i,j;
-
-	printf("\n%d %d\n",rows,cols);
 
 	/* crio os vectores que vai receber os valores de cada linha e
 	 * de cada coluna*/
@@ -106,7 +104,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 
 	/* Faço a copia das matrizes de entrada e armazeno nas matrizes
 	 * criadas por mim */
-	for(i = 0; i < rows; ++i){
+	for(i = n_linha; i < linha_max; ++i){
 		#pragma omp parallel
 		{
 			#pragma omp for
@@ -118,7 +116,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	}
 
 	// Calculos para as linhas
-	for(i = 0; i < rows; ++i){
+	for(i = n_linha; i < linha_max; ++i){
 
 		/* As linhas da imagem/matriz são passados para os
 		 * vectores linhas */
@@ -147,7 +145,7 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	}
 
 	// Devolvo a DFT ou IDFT para a estrutura de saída
-	for(i = 0; i < rows; ++i){
+	for(i = n_linha; i < linha_max; ++i){
 		#pragma omp parallel
 		{
 			#pragma omp for
@@ -159,10 +157,10 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	}
 
 	/* Liberto a memória */
-	matriz_im = NULL;
-	matriz_re = NULL;
-	linha_re = NULL;
-	linha_im = NULL;
-	coluna_im = NULL;
-	coluna_re = NULL;
+	free(matriz_im);
+	free(matriz_re);
+	free(linha_re);
+	free(linha_im);
+	free(coluna_im);
+	free(coluna_re);
 }

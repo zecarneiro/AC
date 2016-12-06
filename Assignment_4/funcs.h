@@ -4,6 +4,7 @@
 #include <math.h>
 #include <complex.h>
 #include <fcntl.h>
+#include <errno.h>
 #include "mpi.h"
 
 #include <time.h>
@@ -41,7 +42,7 @@ void teste(ImageF * in, ImageF * out);
 /* coloque aqui a seguir adeclaração das funções a desenvolver */
 ImageF * genlpfmask(int , int);
 void dofilt(ImageF * , ImageF * , ImageF * , ImageF * , ImageF * );
-void fti(ImageF *, ImageF *, ImageF *, ImageF *, int );
+void fti(ImageF *, ImageF *, ImageF *, ImageF *, int, int, int);
 
 void transposta(ImageF *in_re, ImageF *in_img);
 
