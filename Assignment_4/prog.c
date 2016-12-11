@@ -155,7 +155,6 @@ int main(int argc, char**argv){
 
         /* É feito o calculos para as linhas */
 		Envia_Dados(auxiliar_real, auxiliar_im, out_real, out_imag, inverso, nprocs, num_linha, &status, &request);
-		//Envia_Dados(out_real, out_imag, out_real, out_imag, inverso, nprocs, num_linha, linha_coluna, &status, &request);
 		Recebe_Dados(out_real, out_imag, nprocs, num_linha, &status, &request);
 
 		transposta(out_real, out_imag);
