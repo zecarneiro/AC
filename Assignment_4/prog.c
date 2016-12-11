@@ -132,15 +132,19 @@ int main(int argc, char**argv){
         inverso = 0;
 
         /* É feito o calculos para as linhas */
+        printf("\n-> Para as linhas");
         Envia_Dados(imginf, imgin_img, out_real, out_imag, inverso, nprocs, num_linha, &status, &request);
         Recebe_Dados(out_real, out_imag, nprocs, num_linha, &status, &request);
 
+        printf("\n-> Transposta");
         transposta(out_real, out_imag);
 
         /* É feito o calculos para as colunas */
+        printf("\n-> Para as colunas");
 		Envia_Dados(out_real, out_imag, out_real, out_imag, inverso, nprocs, num_coluna, &status, &request);
 		Recebe_Dados(out_real, out_imag, nprocs, num_coluna, &status, &request);
 
+		printf("\n-> Transposta");
 		transposta(out_real, out_imag);
 
         /**************************************************************
@@ -150,19 +154,23 @@ int main(int argc, char**argv){
 
         /**************************************************************
          *************************** IDFT ****************************/
-        printf("\n========= IDFT\n");
+        printf("\n========= IDFT");
         inverso = 1;
 
         /* É feito o calculos para as linhas */
+        printf("\n-> Para as linhas");
 		Envia_Dados(auxiliar_real, auxiliar_im, out_real, out_imag, inverso, nprocs, num_linha, &status, &request);
 		Recebe_Dados(out_real, out_imag, nprocs, num_linha, &status, &request);
 
+		printf("\n-> Transposta");
 		transposta(out_real, out_imag);
 
         /* É feito o calculos para as colunas */
+        printf("\n-> Para as colunas");
 		Envia_Dados(out_real, out_imag, out_real, out_imag, inverso, nprocs, num_coluna, &status, &request);
 		Recebe_Dados(out_real, out_imag, nprocs, num_coluna, &status, &request);
 
+		printf("\n-> Transposta");
 		transposta(out_real, out_imag);
 
         /**************************************************************
@@ -170,7 +178,7 @@ int main(int argc, char**argv){
 
         clock_gettime(CLOCK_MONOTONIC, &end);
         dif = SubtracaoTempo(begin,end);
-        printf("TEMPO DE EXECUÇÃO = %lld.%.9ld\n", (long long) dif.tv_sec, dif.tv_nsec);
+        printf("\nTEMPO DE EXECUÇÃO = %lld.%.9ld\n", (long long) dif.tv_sec, dif.tv_nsec);
 
         /** copia para imagem de saida imgout */
         double val_re,val_img,val;

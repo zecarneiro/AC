@@ -10,8 +10,8 @@ TARGET = prog_mpi
 RM = rm -f
 CLEAR = clear
 RUN = mpiexec -f
-CLUSTER = cluster_debug
-FILEIN = Example_lena_denoise_noisy.pgm
+CLUSTER = cluster
+FILEIN = greece.pgm
 FILEOUT = imagem.pgm
 
 subsystem:
