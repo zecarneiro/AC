@@ -37,13 +37,15 @@ typedef struct MatrixF ImageF;
 
 Image * loadPBM(char * fname);
 void savePBM(char * fname, Image * image);
-void teste(ImageF * in, ImageF * out);
 
 /* coloque aqui a seguir adeclaração das funções a desenvolver */
 ImageF * genlpfmask(int , int);
 void dofilt(ImageF * , ImageF * , ImageF * , ImageF * , ImageF * );
-void fti(ImageF *, ImageF *, ImageF *, ImageF *, int, int, int);
-
-void transposta(ImageF *in_re, ImageF *in_img);
-
+void fti(ImageF *, ImageF *, ImageF *, ImageF *, int);
 struct timespec SubtracaoTempo(struct timespec Inicio, struct timespec Fim);
+
+int devolve_metade_linha(int);
+int acha_n_linhas(int, int);
+void Envia_Dados(ImageF *, ImageF *, ImageF *, ImageF *, int, int, int, MPI_Status *, MPI_Request *);
+void Recebe_Dados(ImageF *, ImageF *, int, int, MPI_Status *, MPI_Request *);
+void transposta(ImageF *, ImageF *);

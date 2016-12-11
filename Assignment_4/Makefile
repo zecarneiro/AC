@@ -1,12 +1,29 @@
-all: prog_mpi_omp prog_mpi
+# NOME: José Manuel C. Noronha
+# NOME: Luís Marques
 
-prog_mpi_omp: prog.c funcs.h
-	mpicc -g prog.c funcs.c func1.c func2.c transposta.c -lm -lnetpbm -openmp -o prog_mpi_omp
+CC = mpicc
+FLAGS = -lm -lnetpbm
+FLAGS_OMP = -openmp
+FUNC = funcs.c func1.c func2.c func3.c
+PROG = prog.c
+TARGET = prog_mpi
+RM = rm -f
+CLEAR = clear
+RUN = mpiexec -f
+CLUSTER = cluster_debug
+FILEIN = Example_lena_denoise_noisy.pgm
+FILEOUT = imagem.pgm
 
-prog_mpi: prog.c funcs.h
-	mpicc prog.c funcs.c func1.c func2.c transposta.c -lm -lnetpbm -o prog_mpi
+subsystem:
+	$(CLEAR)
+	$(CLEAR)
+	$(RM) $(TARGET)_omp $(TARGET)
+	$(CC) $(PROG) $(FUNC) $(FLAGS) $(FLAGS_OMP) -o $(TARGET)_omp
+	$(CC) $(PROG) $(FUNC) $(FLAGS) -o $(TARGET)
 
-clean:
-	rm -f prog_mpi_omp prog_mpi
+run:
+	$(RUN) $(CLUSTER) ./$(TARGET)_omp $(FILEIN) $(FILEOUT)
 
-#mpirun −f cluster_debug xterm −e gdb −q −tui −x gdb.txt ./prog_mpi_omp
+run1:
+	$(RUN) $(CLUSTER) ./$(TARGET) $(FILEIN) $(FILEOUT)
+	
