@@ -11,7 +11,8 @@ RM = rm -f
 CLEAR = clear
 RUN = mpiexec -f
 CLUSTER = cluster
-FILEIN = greece.pgm
+FILEIN = ImagensProf/bigone.pgm
+FILEIN1 = ImagensNossas/w1.pgm
 FILEOUT = imagem.pgm
 
 subsystem:
