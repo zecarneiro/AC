@@ -282,7 +282,6 @@ void calcula_e_junta(ImageF *in_re, ImageF *in_im, int inv){
             in_im->data[linha*in_im->cols+j] = im->data[i*im->cols+j];
         }
     }
-
     free(re);
     free(im);
 }

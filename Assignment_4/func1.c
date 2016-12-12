@@ -54,36 +54,10 @@ void dofilt(ImageF * in_re, ImageF * in_im, ImageF * mask, ImageF * out_re, Imag
         #pragma omp parallel for
         for(int c = 0; c < cols; c++)
         {
-            //printf("%d ",(int) mask->data[r*cols+c]);
             out_re->data[r*cols+c] = in_re->data[r*cols+c]*mask->data[r*cols+c];
             out_im->data[r*cols+c] = in_im->data[r*cols+c]*mask->data[r*cols+c];
-        }
-        //printf("\n");  
+        } 
     }
-
-    /*printf("\n\n\n\n\n\n\n\n");
-
-    for(int r = 0; r < rows; r++)
-    {
-            for(int c = 0; c < cols; c++)
-            {
-                printf("%d",(int) in_re->data[r*cols+c]);
-            }
-        //}
-        printf("\n");  
-    }
-
-    printf("\n\n\n\n\n\n\n\n");
-
-    for(int r = 0; r < rows; r++)
-    {
-            for(int c = 0; c < cols; c++)
-            {
-                printf("%d",(int) out_re->data[r*cols+c]);
-            }
-        //}
-        printf("\n");  
-    }*/
 }  
 
 

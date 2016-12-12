@@ -84,37 +84,6 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 	 * de cada coluna*/
 	double *linha_re = (double*)malloc(cols*sizeof(double));
 	double *linha_im = (double*)malloc(cols*sizeof(double));
-	double *coluna_re = (double*)malloc(rows*sizeof(double));
-	double *coluna_im = (double*)malloc(rows*sizeof(double));
-
-	/* Nesta parte pretendo criar uma matriz bidimensional */
-	/* Reservo espaço para uma matriz Nx1, nesse caso as matrizes re e im */
-	double **matriz_re = (double**)malloc(rows*sizeof(double*));
-	double **matriz_im = (double**)malloc(rows*sizeof(double*));
-
-	/* Como criei uma matriz Nx1 e por ponteiro de ponteiro, então
-	 * vou criar as colunas para cada matriz criada por anterior */
-	#pragma omp parallel
-	{
-		#pragma omp for
-		for(i = 0; i < rows; ++i){
-			matriz_re[i] = (double*)malloc(cols*sizeof(double));
-			matriz_im[i] = (double*)malloc(cols*sizeof(double));
-		}
-	}
-
-	/* Faço a copia das matrizes de entrada e armazeno nas matrizes
-	 * criadas por mim */
-	for(i = 0; i < rows; ++i){
-		#pragma omp parallel
-		{
-			#pragma omp for
-			for(j = 0; j < cols; ++j){
-				matriz_re[i][j] = in_re->data[i*cols+j];
-				matriz_im[i][j] = in_img->data[i*cols+j];
-			}
-		}
-	}
 
 	// Calculos para as linhas
 	for(i = 0; i < rows; ++i){
@@ -125,8 +94,8 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 		{
 			#pragma omp for
 			for(j = 0; j < cols; ++j){
-				linha_re[j] = matriz_re[i][j];
-				linha_im[j] = matriz_im[i][j];
+				linha_re[j] = in_re->data[i*cols+j];
+				linha_im[j] = in_img->data[i*cols+j];
 			}
 		}		
 
@@ -139,29 +108,13 @@ void fti(ImageF *in_re, ImageF *in_img, ImageF *out_re, ImageF *out_img, int inv
 		{
 			#pragma omp for
 			for(j = 0; j < cols; ++j){
-				matriz_re[i][j] = linha_re[j];
-				matriz_im[i][j] = linha_im[j];
-			}
-		}
-	}
-
-	// Devolvo a DFT ou IDFT para a estrutura de saída
-	for(i = 0; i < rows; ++i){
-		#pragma omp parallel
-		{
-			#pragma omp for
-			for(j = 0; j < cols; ++j){
-				out_re->data[i*cols+j] = matriz_re[i][j];
-				out_img->data[i*cols+j] = matriz_im[i][j];
+				out_re->data[i*cols+j] = linha_re[j];
+				out_img->data[i*cols+j] = linha_im[j];
 			}
 		}
 	}
 
 	/* Liberto a memória */
-	matriz_im = NULL;
-	matriz_re = NULL;
-	linha_re = NULL;
-	linha_im = NULL;
-	coluna_im = NULL;
-	coluna_re = NULL;
+	free(linha_re);
+	free(linha_im);
 }

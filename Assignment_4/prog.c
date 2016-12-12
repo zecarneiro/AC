@@ -112,6 +112,8 @@ int main(int argc, char**argv){
 	    ImageF *out_mask = NULL;
 	    /********************************************************************************/
 
+	    printf("\n\nNumero de IPs disponiveis: %d\n",nprocs);
+
 	    struct timespec begin, end, dif;
         clock_gettime(CLOCK_MONOTONIC, &begin);
 

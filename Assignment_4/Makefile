@@ -11,7 +11,7 @@ RM = rm -f
 CLEAR = clear
 RUN = mpiexec -f
 CLUSTER = cluster
-FILEIN = Example_lena_denoise_noisy.pgm
+FILEIN = greece.pgm
 FILEOUT = imagem.pgm
 
 subsystem:
