@@ -49,3 +49,4 @@ int acha_n_linhas(int, int);
 void Envia_Dados(ImageF *, ImageF *, ImageF *, ImageF *, int, int, int, MPI_Status *, MPI_Request *);
 void Recebe_Dados(ImageF *, ImageF *, int, int, MPI_Status *, MPI_Request *);
 void transposta(ImageF *, ImageF *);
+void calcula_e_junta(ImageF *, ImageF *, int);

@@ -197,7 +197,13 @@ int main(int argc, char**argv){
         }
 
         savePBM(fnameout,imgout);
-        return 0;
+
+        int exit = -1;
+        for(int i = 1; i < nprocs; ++i){
+        	/* Envio sinal que vou terminar */
+	        MPI_Isend(&exit, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &request);
+	        MPI_Wait(&request, &status);
+        }
     }
 
     /* Se for outros processos */
@@ -216,6 +222,11 @@ int main(int argc, char**argv){
     		/* Recebe os Dados do processo mãe */
 	    	MPI_Irecv(&matriz_real->rows, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &request);
 	    	MPI_Wait(&request, &status);
+
+	    	if(matriz_real->rows == -1){
+	    		break;
+	    	}
+
 	    	MPI_Irecv(&matriz_real->cols, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &request);
 	    	MPI_Wait(&request, &status);
 
@@ -235,10 +246,9 @@ int main(int argc, char**argv){
 	    	MPI_Wait(&request, &status);
 
 	        MPI_Irecv(matriz_imag->data, matriz_imag->rows*matriz_imag->cols, MPI_DOUBLE, 0, 4, MPI_COMM_WORLD, &request);
-	        MPI_Wait(&request, &status);	     
-	        
-	        /* Calcula a DFT ou IDFT */
-	        fti(matriz_real, matriz_imag, matriz_real, matriz_imag, inverso);
+	        MPI_Wait(&request, &status);
+
+	        calcula_e_junta(matriz_real, matriz_imag, inverso);
 
 	        /* Envia a matriz real */
 	        MPI_Isend(matriz_real->data, matriz_real->rows*matriz_real->cols, MPI_DOUBLE, 0, 6, MPI_COMM_WORLD, &request);
@@ -250,6 +260,10 @@ int main(int argc, char**argv){
 	        matriz_real->data = NULL;
 	        matriz_imag->data = NULL;
     	}
+
+    	free(matriz_real);
+    	free(matriz_imag);
     }
-    MPI_Finalize();   
+    MPI_Finalize();
+    return 0;   
 }

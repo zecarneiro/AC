@@ -100,7 +100,7 @@ void Envia_Dados(ImageF *re, ImageF *im, ImageF *ou_re, ImageF *ou_im, int inv, 
         }
     }
 
-    fti(env_re, env_im, env_re, env_im, inv);
+    calcula_e_junta(env_re, env_im, inv);
 
     linha = auxiliar; 
     for(int i = 0; i < linha_fim; ++i, ++linha)
@@ -216,4 +216,73 @@ void transposta(ImageF *in_re, ImageF *in_img)
     /* Liberto a memória */
     buffer_re = NULL;
     buffer_img = NULL;
+}
+
+void calcula_e_junta(ImageF *in_re, ImageF *in_im, int inv){
+    int linha_metade, linha, auxiliar;
+    linha_metade = devolve_metade_linha(in_re->rows);
+
+    ImageF *re, *im;
+    re = (ImageF*)malloc(sizeof(ImageF));
+    im = (ImageF*)malloc(sizeof(ImageF));
+
+    re->rows = linha_metade;
+    re->cols = in_re->cols;
+    re->data = (double *)malloc(re->rows*re->cols*sizeof(double));
+    im->rows = linha_metade;
+    im->cols = in_im->cols;
+    im->data = (double *)malloc(im->rows*im->cols*sizeof(double));
+
+    linha = 0;
+    for(int i = 0; i < re->rows; ++i, ++linha){
+        #pragma omp parallel for
+        for(int j = 0; j < re->cols; ++j){
+            re->data[i*re->cols+j] = in_re->data[linha*in_re->cols+j];
+            im->data[i*im->cols+j] = in_im->data[linha*in_im->cols+j];
+        }
+    }
+    auxiliar = linha;    
+
+    /* Calcula a DFT ou IDFT */
+    fti(re, im, re, im, inv);
+
+    linha = 0;
+    for(int i = 0; i < re->rows; ++i, ++linha){
+        #pragma omp parallel for
+        for(int j = 0; j < re->cols; ++j){
+            in_re->data[linha*in_re->cols+j] = re->data[i*re->cols+j];
+            in_im->data[linha*in_im->cols+j] = im->data[i*im->cols+j];
+        }
+    }
+
+    linha = auxiliar;
+    re->rows = in_re->rows - linha;
+    im->rows = re->rows;
+    re->data = NULL;
+    im->data = NULL;
+    re->data = (double *)malloc(re->rows*re->cols*sizeof(double));
+    im->data = (double *)malloc(im->rows*im->cols*sizeof(double));
+
+    for(int i = 0; i < re->rows; ++i, ++linha){
+        #pragma omp parallel for
+        for(int j = 0; j < re->cols; ++j){
+            re->data[i*re->cols+j] = in_re->data[linha*in_re->cols+j];
+            im->data[i*im->cols+j] = in_im->data[linha*in_im->cols+j];
+        }
+    }
+
+    /* Calcula a DFT ou IDFT */
+    fti(re, im,re, im, inv);
+
+    linha = auxiliar;
+    for(int i = 0; i < re->rows; ++i, ++linha){
+        #pragma omp parallel for
+        for(int j = 0; j < re->cols; ++j){
+            in_re->data[linha*in_re->cols+j] = re->data[i*re->cols+j];
+            in_im->data[linha*in_im->cols+j] = im->data[i*im->cols+j];
+        }
+    }
+
+    free(re);
+    free(im);
 }
