@@ -1,17 +1,5 @@
 #include "funcs.h"
 
-int devolve_metade_linha(int linha){
-	int linhas_p1;
-
-	if(linha%2 == 0){
-		return linha/2;
-	}
-
-	else{
-		return (linha-1)/2;
-	}
-}
-
 /* Função usada para se o bter o numero de linhas que cada
  * processo vai calcular */
 int acha_n_linhas(int rows,int NUM_Proc){
@@ -219,69 +207,58 @@ void transposta(ImageF *in_re, ImageF *in_img)
 }
 
 void calcula_e_junta(ImageF *in_re, ImageF *in_im, int inv){
-    int linha_metade, linha, auxiliar;
-    linha_metade = devolve_metade_linha(in_re->rows);
+    int linha_max = MAX;
+    int linha_copia, linha_preenche, exit;
 
     ImageF *re, *im;
     re = (ImageF*)malloc(sizeof(ImageF));
     im = (ImageF*)malloc(sizeof(ImageF));
 
-    re->rows = linha_metade;
+    re->rows = linha_max;
     re->cols = in_re->cols;
     re->data = (double *)malloc(re->rows*re->cols*sizeof(double));
-    im->rows = linha_metade;
+    im->rows = linha_max;
     im->cols = in_im->cols;
     im->data = (double *)malloc(im->rows*im->cols*sizeof(double));
 
-    linha = 0;
-    for(int i = 0; i < re->rows; ++i, ++linha){
-        #pragma omp parallel for
-        for(int j = 0; j < re->cols; ++j){
-            re->data[i*re->cols+j] = in_re->data[linha*in_re->cols+j];
-            im->data[i*im->cols+j] = in_im->data[linha*in_im->cols+j];
-        }
+    linha_preenche = 0;
+    linha_copia = 0;
+    exit = -1;
+    while(exit == -1){    	
+    	if((in_re->rows - linha_copia) <= linha_max){
+    		re->rows = in_re->rows - linha_copia;
+    		im->rows = in_im->rows - linha_copia;
+
+    		re->data = NULL;
+    		im->data = NULL;
+    		re->data = (double *)malloc(re->rows*re->cols*sizeof(double));
+    		im->data = (double *)malloc(im->rows*im->cols*sizeof(double));
+
+    		exit = 0;
+    	}
+
+    	#pragma omp parallel for
+    	for(int i = 0; i < re->rows; ++i, ++linha_copia){
+	        #pragma omp parallel for
+	        for(int j = 0; j < re->cols; ++j){
+	            re->data[i*re->cols+j] = in_re->data[linha_copia*in_re->cols+j];
+	            im->data[i*im->cols+j] = in_im->data[linha_copia*in_im->cols+j];
+	        }
+	    }
+
+	    /* Calcula a DFT ou IDFT */
+	    fti(re, im, re, im, inv);
+
+	    #pragma omp parallel for
+	    for(int i = 0; i < re->rows; ++i, ++linha_preenche){
+	        #pragma omp parallel for
+	        for(int j = 0; j < re->cols; ++j){
+	            in_re->data[linha_preenche*in_re->cols+j] = re->data[i*re->cols+j];
+	            in_im->data[linha_preenche*in_im->cols+j] = im->data[i*im->cols+j];
+	        }
+	    }
     }
-    auxiliar = linha;    
-
-    /* Calcula a DFT ou IDFT */
-    fti(re, im, re, im, inv);
-
-    linha = 0;
-    for(int i = 0; i < re->rows; ++i, ++linha){
-        #pragma omp parallel for
-        for(int j = 0; j < re->cols; ++j){
-            in_re->data[linha*in_re->cols+j] = re->data[i*re->cols+j];
-            in_im->data[linha*in_im->cols+j] = im->data[i*im->cols+j];
-        }
-    }
-
-    linha = auxiliar;
-    re->rows = in_re->rows - linha;
-    im->rows = re->rows;
-    re->data = NULL;
-    im->data = NULL;
-    re->data = (double *)malloc(re->rows*re->cols*sizeof(double));
-    im->data = (double *)malloc(im->rows*im->cols*sizeof(double));
-
-    for(int i = 0; i < re->rows; ++i, ++linha){
-        #pragma omp parallel for
-        for(int j = 0; j < re->cols; ++j){
-            re->data[i*re->cols+j] = in_re->data[linha*in_re->cols+j];
-            im->data[i*im->cols+j] = in_im->data[linha*in_im->cols+j];
-        }
-    }
-
-    /* Calcula a DFT ou IDFT */
-    fti(re, im,re, im, inv);
-
-    linha = auxiliar;
-    for(int i = 0; i < re->rows; ++i, ++linha){
-        #pragma omp parallel for
-        for(int j = 0; j < re->cols; ++j){
-            in_re->data[linha*in_re->cols+j] = re->data[i*re->cols+j];
-            in_im->data[linha*in_im->cols+j] = im->data[i*im->cols+j];
-        }
-    }
+    
     free(re);
     free(im);
 }

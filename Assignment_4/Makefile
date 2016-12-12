@@ -10,9 +10,9 @@ TARGET = prog_mpi
 RM = rm -f
 CLEAR = clear
 RUN = mpiexec -f
-CLUSTER = cluster
-FILEIN = ImagensProf/bigone.pgm
-FILEIN1 = ImagensNossas/w1.pgm
+CLUSTER = cluster_debug
+FILEIN = ImagensProf/Example_lena_denoise_noisy.pgm
+FILEIN1 = ImagensNossas/w.pgm
 FILEOUT = imagem.pgm
 
 subsystem:

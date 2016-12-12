@@ -18,6 +18,7 @@
 
 #define UM_SEC 1000000000L
 #define PI 3.14159265359
+#define MAX 5
 
 struct Matrix{
   int rows;
@@ -44,7 +45,6 @@ void dofilt(ImageF * , ImageF * , ImageF * , ImageF * , ImageF * );
 void fti(ImageF *, ImageF *, ImageF *, ImageF *, int);
 struct timespec SubtracaoTempo(struct timespec Inicio, struct timespec Fim);
 
-int devolve_metade_linha(int);
 int acha_n_linhas(int, int);
 void Envia_Dados(ImageF *, ImageF *, ImageF *, ImageF *, int, int, int, MPI_Status *, MPI_Request *);
 void Recebe_Dados(ImageF *, ImageF *, int, int, MPI_Status *, MPI_Request *);
